@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>左右落下ゲーム</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="game-container">
+        <div id="score">スコア: <span id="score-value">0</span></div>
+        <div id="game-area"></div>
+        <div id="instructions">
+            <p>黒文字：文字通り（「左」→←キー/左スワイプ、「右」→→キー/右スワイプ）</p>
+            <p>赤文字：位置で判断（左列→←キー/左スワイプ、右列→→キー/右スワイプ）</p>
+            <button id="start-btn">ゲーム開始</button>
+        </div>
+    </div>
+    <script src="game.js"></script>
+</body>
+</html>
