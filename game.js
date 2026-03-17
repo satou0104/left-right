@@ -11,6 +11,7 @@ class FallingGame {
         this.spawnRate = 0.035;
         this.lastSpawnColumn = null; // 最後に生成した列を記録
         this.columnCooldown = 0; // 列のクールダウン時間
+        this.lastSpawnTime = 0; // 最後に文字を生成した時間
         
         this.init();
     }
@@ -58,6 +59,7 @@ class FallingGame {
         this.spawnRate = 0.035; // 初期生成率を上げる（テンポアップ）
         this.lastSpawnColumn = null; // リセット
         this.columnCooldown = 0; // リセット
+        this.lastSpawnTime = 0; // リセット
         this.updateScore();
         this.startBtn.textContent = 'ゲーム中...';
         this.startBtn.disabled = true;
@@ -91,85 +93,93 @@ class FallingGame {
     }
     
     spawnChar() {
-        const chars = ['左', '右'];
-        const colors = ['#000000', '#ff4757']; // 黒と赤
-        const char = chars[Math.floor(Math.random() * chars.length)];
-        const color = colors[Math.floor(Math.random() * colors.length)];
-        
-        // ゲームエリアの幅に応じて列の位置を計算（各列の中央）
-        const gameAreaWidth = this.gameArea.offsetWidth;
-        const leftColumn = gameAreaWidth * 0.25; // 左列の中央（0-50%の中央 = 25%）
-        const rightColumn = gameAreaWidth * 0.75; // 右列の中央（50-100%の中央 = 75%）
-        const columns = [leftColumn, rightColumn];
-        const availableColumns = [];
-        
-        // 各列の上部で文字の重複をより厳しくチェック（半分以上重ならないように）
-        for (let i = 0; i < columns.length; i++) {
-            const column = columns[i];
-            let hasCharInTop = false;
-            for (const charObj of this.fallingChars) {
-                // 文字の高さを約80pxと仮定して、半分（40px）以上重ならないようにチェック
-                if (Math.abs(charObj.x - column) < 30 && charObj.y < 300) {
-                    hasCharInTop = true;
-                    break;
-                }
+            const currentTime = Date.now();
+
+            // 最後の生成から0.2秒（200ms）経過していない場合は生成しない
+            if (currentTime - this.lastSpawnTime < 200) {
+                return;
             }
-            if (!hasCharInTop) {
-                // クールダウン中の列は除外（並びを防ぐため）
-                if (this.lastSpawnColumn !== i || this.columnCooldown <= 0) {
+
+            const chars = ['左', '右'];
+            const colors = ['#000000', '#ff4757']; // 黒と赤
+            const char = chars[Math.floor(Math.random() * chars.length)];
+            const color = colors[Math.floor(Math.random() * colors.length)];
+
+            // ゲームエリアの幅に応じて列の位置を計算（中央線からもう少し離す）
+            const gameAreaWidth = this.gameArea.offsetWidth;
+            const leftColumn = gameAreaWidth * 0.20; // 左列をもう少し左に（20%）
+            const rightColumn = gameAreaWidth * 0.80; // 右列をもう少し右に（80%）
+            const columns = [leftColumn, rightColumn];
+            const availableColumns = [];
+
+            // 各列の上部で文字の重複をチェック（縦の間隔をもっと空ける）
+            for (let i = 0; i < columns.length; i++) {
+                const column = columns[i];
+                let hasCharInTop = false;
+                for (const charObj of this.fallingChars) {
+                    // 文字サイズ2個分程度（約200px）の間隔をつける
+                    if (Math.abs(charObj.x - column) < 30 && charObj.y < 200) {
+                        hasCharInTop = true;
+                        break;
+                    }
+                }
+                if (!hasCharInTop) {
                     availableColumns.push({column: column, index: i});
                 }
             }
-        }
-        
-        // 利用可能な列がない場合、または前回と同じ列しかない場合は生成しない
-        if (availableColumns.length === 0) {
-            return;
-        }
-        
-        // 前回と同じ列しかない場合も生成を控える（より厳しく）
-        if (availableColumns.length === 1 && this.lastSpawnColumn !== null && 
-            availableColumns[0].index === this.lastSpawnColumn && this.columnCooldown > 20) {
-            return;
-        }
-        
-        // 前回と違う列を強制的に選択（並びを完全に防ぐ）
-        let selectedColumn;
-        if (this.lastSpawnColumn !== null && availableColumns.length > 1) {
-            // 前回と違う列のみから選択
-            const otherColumns = availableColumns.filter(col => col.index !== this.lastSpawnColumn);
-            if (otherColumns.length > 0) {
-                selectedColumn = otherColumns[Math.floor(Math.random() * otherColumns.length)];
-            } else {
-                // 他に選択肢がない場合のみ同じ列を許可
-                selectedColumn = availableColumns[Math.floor(Math.random() * availableColumns.length)];
+
+            // 利用可能な列がない場合は生成しない
+            if (availableColumns.length === 0) {
+                return;
             }
-        } else {
-            selectedColumn = availableColumns[Math.floor(Math.random() * availableColumns.length)];
+
+            // 前回と同じ列から生成する場合は、追加の時間制限を設ける
+            let selectedColumn;
+            if (this.lastSpawnColumn !== null) {
+                const timeSinceLastSpawn = currentTime - this.lastSpawnTime;
+
+                // 前回と違う列が利用可能な場合は、そちらを優先
+                const otherColumns = availableColumns.filter(col => col.index !== this.lastSpawnColumn);
+                if (otherColumns.length > 0) {
+                    // 違う列から選択
+                    const selectedIndex = Math.floor(Math.random() * otherColumns.length);
+                    selectedColumn = otherColumns[selectedIndex];
+                } else {
+                    // 同じ列しかない場合は、0.5秒以上経過していれば許可
+                    if (timeSinceLastSpawn < 500) {
+                        return;
+                    }
+                    selectedColumn = availableColumns[0];
+                }
+            } else {
+                // 初回はランダム選択
+                const selectedIndex = Math.floor(Math.random() * availableColumns.length);
+                selectedColumn = availableColumns[selectedIndex];
+            }
+
+            const x = selectedColumn.column;
+            this.lastSpawnColumn = selectedColumn.index;
+            this.lastSpawnTime = currentTime; // 生成時間を記録
+
+            const charElement = document.createElement('div');
+            charElement.className = 'falling-char';
+            charElement.textContent = char;
+            // 文字の中央が指定位置になるように調整（iPhone用に位置を修正）
+            charElement.style.left = (x - 50) + 'px'; // より大きく左にオフセット
+            charElement.style.top = '0px';
+            charElement.style.color = color;
+            charElement.dataset.char = char;
+
+            this.gameArea.appendChild(charElement);
+            this.fallingChars.push({
+                element: charElement,
+                char: char,
+                x: x, // 実際の中央位置を保存
+                y: 0,
+                matched: false
+            });
         }
-        
-        const x = selectedColumn.column;
-        this.lastSpawnColumn = selectedColumn.index;
-        this.columnCooldown = 80; // 80フレーム（約1.3秒）に延長して重複を防ぐ
-        
-        const charElement = document.createElement('div');
-        charElement.className = 'falling-char';
-        charElement.textContent = char;
-        // 文字の中央が指定位置になるように調整（iPhone用に位置を修正）
-        charElement.style.left = (x - 50) + 'px'; // より大きく左にオフセット
-        charElement.style.top = '0px';
-        charElement.style.color = color;
-        charElement.dataset.char = char;
-        
-        this.gameArea.appendChild(charElement);
-        this.fallingChars.push({
-            element: charElement,
-            char: char,
-            x: x, // 実際の中央位置を保存
-            y: 0,
-            matched: false
-        });
-    }
+
     
     updateChars() {
         for (let i = this.fallingChars.length - 1; i >= 0; i--) {
@@ -238,13 +248,13 @@ class FallingGame {
                 isCorrectKey = true;
             }
         } else {
-            // 赤文字：位置で判断（左列=25%、右列=75%）
+            // 赤文字：位置で判断（左列=20%、右列=80%）
             const gameAreaWidth = this.gameArea.offsetWidth;
-            const leftColumn = gameAreaWidth * 0.25;
-            const rightColumn = gameAreaWidth * 0.75;
+            const leftColumn = gameAreaWidth * 0.20;
+            const rightColumn = gameAreaWidth * 0.80;
             
-            if ((Math.abs(bottomMostChar.x - leftColumn) < 30 && direction === 'left') || 
-                (Math.abs(bottomMostChar.x - rightColumn) < 30 && direction === 'right')) {
+            if ((Math.abs(bottomMostChar.x - leftColumn) < 50 && direction === 'left') || 
+                (Math.abs(bottomMostChar.x - rightColumn) < 50 && direction === 'right')) {
                 isCorrectKey = true;
             }
         }
