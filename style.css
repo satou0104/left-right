@@ -7,6 +7,9 @@ body {
     justify-content: center;
     align-items: center;
     min-height: 100vh;
+    -webkit-touch-callout: none; /* iOSでの長押しメニューを無効化 */
+    -webkit-user-select: none; /* テキスト選択を無効化 */
+    -webkit-tap-highlight-color: transparent; /* タップ時のハイライトを無効化 */
 }
 
 #game-container {
@@ -58,6 +61,9 @@ body {
     cursor: pointer;
     margin-top: 10px;
     transition: background 0.3s;
+    -webkit-appearance: none; /* iOSのデフォルトスタイルを無効化 */
+    -webkit-tap-highlight-color: transparent; /* タップ時のハイライトを無効化 */
+    touch-action: manipulation; /* タッチ操作を最適化 */
 }
 
 #start-btn:hover {

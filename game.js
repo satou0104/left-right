@@ -15,6 +15,11 @@ class FallingGame {
     
     init() {
         this.startBtn.addEventListener('click', () => this.startGame());
+        // iOSでのタッチイベントも追加
+        this.startBtn.addEventListener('touchend', (e) => {
+            e.preventDefault();
+            this.startGame();
+        });
         document.addEventListener('keydown', (e) => this.handleKeyPress(e));
         
         // タッチイベントの追加
