@@ -9,6 +9,8 @@ class FallingGame {
         this.fallingChars = [];
         this.gameSpeed = 2;
         this.spawnRate = 0.02;
+        this.lastSpawnColumn = null; // 最後に生成した列を記録
+        this.columnCooldown = 0; // 列のクールダウン時間
         
         this.init();
     }
@@ -54,6 +56,8 @@ class FallingGame {
         this.gameArea.innerHTML = '';
         this.gameSpeed = 2; // 初期スピードにリセット
         this.spawnRate = 0.02; // 初期生成率にリセット
+        this.lastSpawnColumn = null; // リセット
+        this.columnCooldown = 0; // リセット
         this.updateScore();
         this.startBtn.textContent = 'ゲーム中...';
         this.startBtn.disabled = true;
@@ -63,6 +67,11 @@ class FallingGame {
     
     gameLoop() {
         if (!this.gameRunning) return;
+        
+        // クールダウンを減らす
+        if (this.columnCooldown > 0) {
+            this.columnCooldown--;
+        }
         
         // 新しい文字を生成
         if (Math.random() < this.spawnRate) {
@@ -94,26 +103,53 @@ class FallingGame {
         const columns = [leftColumn, rightColumn];
         const availableColumns = [];
         
-        // 各列の上部（y < 100）に文字があるかチェック
-        for (const column of columns) {
+        // 各列の上部（y < 200）に文字があるかチェック（範囲をさらに拡大）
+        for (let i = 0; i < columns.length; i++) {
+            const column = columns[i];
             let hasCharInTop = false;
             for (const charObj of this.fallingChars) {
-                if (Math.abs(charObj.x - column) < 30 && charObj.y < 100) {
+                if (Math.abs(charObj.x - column) < 30 && charObj.y < 200) {
                     hasCharInTop = true;
                     break;
                 }
             }
             if (!hasCharInTop) {
-                availableColumns.push(column);
+                // クールダウン中の列は除外（並びを防ぐため）
+                if (this.lastSpawnColumn !== i || this.columnCooldown <= 0) {
+                    availableColumns.push({column: column, index: i});
+                }
             }
         }
         
-        // 利用可能な列がない場合は生成しない
+        // 利用可能な列がない場合、または前回と同じ列しかない場合は生成しない
         if (availableColumns.length === 0) {
             return;
         }
         
-        const x = availableColumns[Math.floor(Math.random() * availableColumns.length)];
+        // 前回と同じ列しかない場合も生成を控える
+        if (availableColumns.length === 1 && this.lastSpawnColumn !== null && 
+            availableColumns[0].index === this.lastSpawnColumn && this.columnCooldown > 30) {
+            return;
+        }
+        
+        // 前回と違う列を強制的に選択（並びを完全に防ぐ）
+        let selectedColumn;
+        if (this.lastSpawnColumn !== null && availableColumns.length > 1) {
+            // 前回と違う列のみから選択
+            const otherColumns = availableColumns.filter(col => col.index !== this.lastSpawnColumn);
+            if (otherColumns.length > 0) {
+                selectedColumn = otherColumns[Math.floor(Math.random() * otherColumns.length)];
+            } else {
+                // 他に選択肢がない場合のみ同じ列を許可
+                selectedColumn = availableColumns[Math.floor(Math.random() * availableColumns.length)];
+            }
+        } else {
+            selectedColumn = availableColumns[Math.floor(Math.random() * availableColumns.length)];
+        }
+        
+        const x = selectedColumn.column;
+        this.lastSpawnColumn = selectedColumn.index;
+        this.columnCooldown = 90; // 90フレーム（約1.5秒）のクールダウンに延長
         
         const charElement = document.createElement('div');
         charElement.className = 'falling-char';
@@ -213,6 +249,7 @@ class FallingGame {
         }
         
         if (isCorrectKey) {
+            // 正解の場合
             bottomMostChar.matched = true;
             const charElement = bottomMostChar.element;
             charElement.style.color = '#2ed573';
@@ -225,6 +262,9 @@ class FallingGame {
             
             this.score++;
             this.updateScore();
+        } else {
+            // 間違いの場合：ゲームオーバー
+            this.gameOver();
         }
     }
     
