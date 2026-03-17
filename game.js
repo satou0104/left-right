@@ -27,39 +27,20 @@ class FallingGame {
     }
     
     setupTouchEvents() {
-        let touchStartX = 0;
-        let touchStartY = 0;
-        
-        this.gameArea.addEventListener('touchstart', (e) => {
-            e.preventDefault();
-            const touch = e.touches[0];
-            touchStartX = touch.clientX;
-            touchStartY = touch.clientY;
-        }, { passive: false });
-        
         this.gameArea.addEventListener('touchend', (e) => {
             e.preventDefault();
             if (!this.gameRunning) return;
             
             const touch = e.changedTouches[0];
-            const touchEndX = touch.clientX;
-            const touchEndY = touch.clientY;
+            const rect = this.gameArea.getBoundingClientRect();
+            const touchX = touch.clientX - rect.left;
+            const gameAreaWidth = this.gameArea.offsetWidth;
             
-            const deltaX = touchEndX - touchStartX;
-            const deltaY = touchEndY - touchStartY;
-            
-            // 最小スワイプ距離
-            const minSwipeDistance = 50;
-            
-            // 横方向のスワイプが縦方向より大きい場合のみ処理
-            if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > minSwipeDistance) {
-                if (deltaX > 0) {
-                    // 右スワイプ
-                    this.handleSwipe('right');
-                } else {
-                    // 左スワイプ
-                    this.handleSwipe('left');
-                }
+            // 左半分をタッチした場合は左、右半分をタッチした場合は右
+            if (touchX < gameAreaWidth / 2) {
+                this.handleTouch('left');
+            } else {
+                this.handleTouch('right');
             }
         }, { passive: false });
     }
@@ -185,7 +166,7 @@ class FallingGame {
         this.processInput(pressedKey);
     }
     
-    handleSwipe(direction) {
+    handleTouch(direction) {
         if (!this.gameRunning) return;
         this.processInput(direction);
     }
