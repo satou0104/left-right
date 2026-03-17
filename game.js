@@ -106,10 +106,10 @@ class FallingGame {
         const char = chars[Math.floor(Math.random() * chars.length)];
         const color = colors[Math.floor(Math.random() * colors.length)];
         
-        // ゲームエリアの幅に応じて列の位置を計算
+        // ゲームエリアの幅に応じて列の位置を計算（各列の中央）
         const gameAreaWidth = this.gameArea.offsetWidth;
-        const leftColumn = gameAreaWidth * 0.25; // 左から25%の位置
-        const rightColumn = gameAreaWidth * 0.75; // 左から75%の位置
+        const leftColumn = gameAreaWidth * 0.25; // 左列の中央（0-50%の中央 = 25%）
+        const rightColumn = gameAreaWidth * 0.75; // 右列の中央（50-100%の中央 = 75%）
         const columns = [leftColumn, rightColumn];
         const availableColumns = [];
         
@@ -117,7 +117,7 @@ class FallingGame {
         for (const column of columns) {
             let hasCharInTop = false;
             for (const charObj of this.fallingChars) {
-                if (Math.abs(charObj.x - column) < 20 && charObj.y < 100) {
+                if (Math.abs(charObj.x - column) < 30 && charObj.y < 100) {
                     hasCharInTop = true;
                     break;
                 }
@@ -137,7 +137,8 @@ class FallingGame {
         const charElement = document.createElement('div');
         charElement.className = 'falling-char';
         charElement.textContent = char;
-        charElement.style.left = x + 'px';
+        // 文字の中央が指定位置になるように調整
+        charElement.style.left = (x - 40) + 'px'; // 文字サイズが大きくなったので調整
         charElement.style.top = '0px';
         charElement.style.color = color;
         charElement.dataset.char = char;
@@ -146,7 +147,7 @@ class FallingGame {
         this.fallingChars.push({
             element: charElement,
             char: char,
-            x: x,
+            x: x, // 実際の中央位置を保存
             y: 0,
             matched: false
         });
@@ -224,8 +225,8 @@ class FallingGame {
             const leftColumn = gameAreaWidth * 0.25;
             const rightColumn = gameAreaWidth * 0.75;
             
-            if ((Math.abs(bottomMostChar.x - leftColumn) < 20 && direction === 'left') || 
-                (Math.abs(bottomMostChar.x - rightColumn) < 20 && direction === 'right')) {
+            if ((Math.abs(bottomMostChar.x - leftColumn) < 30 && direction === 'left') || 
+                (Math.abs(bottomMostChar.x - rightColumn) < 30 && direction === 'right')) {
                 isCorrectKey = true;
             }
         }
@@ -274,6 +275,7 @@ class FallingGame {
             border-radius: 10px;
             text-align: center;
             font-size: 24px;
+            z-index: 10;
         `;
         gameOverDiv.innerHTML = `
             <div>ゲームオーバー!</div>
