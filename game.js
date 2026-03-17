@@ -106,15 +106,18 @@ class FallingGame {
         const char = chars[Math.floor(Math.random() * chars.length)];
         const color = colors[Math.floor(Math.random() * colors.length)];
         
-        // 2列に配置：左列（x=100）と右列（x=250）
-        const columns = [100, 250];
+        // ゲームエリアの幅に応じて列の位置を計算
+        const gameAreaWidth = this.gameArea.offsetWidth;
+        const leftColumn = gameAreaWidth * 0.25; // 左から25%の位置
+        const rightColumn = gameAreaWidth * 0.75; // 左から75%の位置
+        const columns = [leftColumn, rightColumn];
         const availableColumns = [];
         
         // 各列の上部（y < 100）に文字があるかチェック
         for (const column of columns) {
             let hasCharInTop = false;
             for (const charObj of this.fallingChars) {
-                if (charObj.x === column && charObj.y < 100) {
+                if (Math.abs(charObj.x - column) < 20 && charObj.y < 100) {
                     hasCharInTop = true;
                     break;
                 }
@@ -217,9 +220,13 @@ class FallingGame {
                 isCorrectKey = true;
             }
         } else {
-            // 赤文字：位置で判断（左列=100px、右列=250px）
-            if ((bottomMostChar.x === 100 && direction === 'left') || 
-                (bottomMostChar.x === 250 && direction === 'right')) {
+            // 赤文字：位置で判断（左列=25%、右列=75%）
+            const gameAreaWidth = this.gameArea.offsetWidth;
+            const leftColumn = gameAreaWidth * 0.25;
+            const rightColumn = gameAreaWidth * 0.75;
+            
+            if ((Math.abs(bottomMostChar.x - leftColumn) < 20 && direction === 'left') || 
+                (Math.abs(bottomMostChar.x - rightColumn) < 20 && direction === 'right')) {
                 isCorrectKey = true;
             }
         }
