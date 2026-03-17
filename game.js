@@ -190,7 +190,6 @@ class FallingGame {
     }
     
     processInput(direction) {
-    processInput(direction) {
         // 画面内の全ての文字から一番下の文字を見つける
         let bottomMostChar = null;
         let bottomMostY = -1;
@@ -245,7 +244,6 @@ class FallingGame {
             this.score++;
             this.updateScore();
         }
-    }
     }
     
     removeChar(index) {
