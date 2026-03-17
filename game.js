@@ -8,7 +8,7 @@ class FallingGame {
         this.gameRunning = false;
         this.fallingChars = [];
         this.gameSpeed = 2;
-        this.spawnRate = 0.02;
+        this.spawnRate = 0.035;
         this.lastSpawnColumn = null; // 最後に生成した列を記録
         this.columnCooldown = 0; // 列のクールダウン時間
         
@@ -55,7 +55,7 @@ class FallingGame {
         this.fallingChars = [];
         this.gameArea.innerHTML = '';
         this.gameSpeed = 2; // 初期スピードにリセット
-        this.spawnRate = 0.02; // 初期生成率にリセット
+        this.spawnRate = 0.035; // 初期生成率を上げる（テンポアップ）
         this.lastSpawnColumn = null; // リセット
         this.columnCooldown = 0; // リセット
         this.updateScore();
@@ -103,12 +103,13 @@ class FallingGame {
         const columns = [leftColumn, rightColumn];
         const availableColumns = [];
         
-        // 各列の上部（y < 200）に文字があるかチェック（範囲をさらに拡大）
+        // 各列の上部で文字の重複をより厳しくチェック（半分以上重ならないように）
         for (let i = 0; i < columns.length; i++) {
             const column = columns[i];
             let hasCharInTop = false;
             for (const charObj of this.fallingChars) {
-                if (Math.abs(charObj.x - column) < 30 && charObj.y < 200) {
+                // 文字の高さを約80pxと仮定して、半分（40px）以上重ならないようにチェック
+                if (Math.abs(charObj.x - column) < 30 && charObj.y < 300) {
                     hasCharInTop = true;
                     break;
                 }
@@ -126,9 +127,9 @@ class FallingGame {
             return;
         }
         
-        // 前回と同じ列しかない場合も生成を控える
+        // 前回と同じ列しかない場合も生成を控える（より厳しく）
         if (availableColumns.length === 1 && this.lastSpawnColumn !== null && 
-            availableColumns[0].index === this.lastSpawnColumn && this.columnCooldown > 30) {
+            availableColumns[0].index === this.lastSpawnColumn && this.columnCooldown > 20) {
             return;
         }
         
@@ -149,13 +150,13 @@ class FallingGame {
         
         const x = selectedColumn.column;
         this.lastSpawnColumn = selectedColumn.index;
-        this.columnCooldown = 90; // 90フレーム（約1.5秒）のクールダウンに延長
+        this.columnCooldown = 80; // 80フレーム（約1.3秒）に延長して重複を防ぐ
         
         const charElement = document.createElement('div');
         charElement.className = 'falling-char';
         charElement.textContent = char;
-        // 文字の中央が指定位置になるように調整
-        charElement.style.left = (x - 40) + 'px'; // 文字サイズが大きくなったので調整
+        // 文字の中央が指定位置になるように調整（iPhone用に位置を修正）
+        charElement.style.left = (x - 50) + 'px'; // より大きく左にオフセット
         charElement.style.top = '0px';
         charElement.style.color = color;
         charElement.dataset.char = char;
