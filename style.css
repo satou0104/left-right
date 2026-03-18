@@ -11,7 +11,6 @@ body {
     -webkit-user-select: none;
     -webkit-tap-highlight-color: transparent;
     position: relative;
-    overflow: hidden;
 }
 
 /* サイバーグリッド背景 */
@@ -28,12 +27,6 @@ body::before {
     background-size: 40px 40px;
     pointer-events: none;
     z-index: -1;
-    animation: gridMove 20s linear infinite;
-}
-
-@keyframes gridMove {
-    0% { transform: translate(0, 0); }
-    100% { transform: translate(40px, 40px); }
 }
 
 #game-container {
@@ -41,38 +34,13 @@ body::before {
     backdrop-filter: blur(10px);
     border-radius: 8px;
     padding: 24px;
-    box-shadow: 
-        0 0 30px rgba(0, 255, 255, 0.3),
-        0 0 60px rgba(255, 0, 255, 0.2),
-        inset 0 1px 0 rgba(0, 255, 255, 0.2);
+    box-shadow: 0 0 30px rgba(0, 255, 255, 0.3);
     text-align: center;
     width: 90%;
     max-width: 450px;
     margin: 10px;
-    border: 2px solid;
-    border-image: linear-gradient(45deg, #00ffff, #ff00ff, #ffff00, #00ffff) 1;
+    border: 2px solid #00ffff;
     position: relative;
-}
-
-/* ネオンエフェクト */
-#game-container::before {
-    content: '';
-    position: absolute;
-    top: -4px;
-    left: -4px;
-    right: -4px;
-    bottom: -4px;
-    background: linear-gradient(45deg, #00ffff, #ff00ff, #ffff00, #00ffff);
-    border-radius: 12px;
-    z-index: -1;
-    filter: blur(8px);
-    opacity: 0.7;
-    animation: neonPulse 2s ease-in-out infinite alternate;
-}
-
-@keyframes neonPulse {
-    0% { opacity: 0.7; }
-    100% { opacity: 1; }
 }
 
 #score {
@@ -80,51 +48,9 @@ body::before {
     font-weight: 700;
     margin-bottom: 20px;
     color: #00ffff;
-    text-shadow: 
-        0 0 10px #00ffff,
-        0 0 20px #00ffff,
-        0 0 30px #00ffff;
+    text-shadow: 0 0 10px #00ffff;
     font-family: 'Courier New', monospace;
     letter-spacing: 2px;
-    animation: scoreGlow 1.5s ease-in-out infinite alternate;
-}
-
-@keyframes scoreGlow {
-    0% { 
-        text-shadow: 
-            0 0 10px #00ffff,
-            0 0 20px #00ffff,
-            0 0 30px #00ffff;
-    }
-    100% { 
-        text-shadow: 
-            0 0 15px #00ffff,
-            0 0 25px #00ffff,
-            0 0 35px #00ffff,
-            0 0 45px #00ffff;
-    }
-}
-
-#score::after {
-    content: '▶';
-    position: absolute;
-    left: -40px;
-    top: 50%;
-    transform: translateY(-50%);
-    color: #ff00ff;
-    font-size: 16px;
-    text-shadow: 0 0 10px #ff00ff;
-}
-
-#score::before {
-    content: '◀';
-    position: absolute;
-    right: -40px;
-    top: 50%;
-    transform: translateY(-50%);
-    color: #ff00ff;
-    font-size: 16px;
-    text-shadow: 0 0 10px #ff00ff;
 }
 
 #game-area {
@@ -135,7 +61,7 @@ body::before {
     max-height: 600px;
     border: none;
     position: relative;
-    background: linear-gradient(180deg, #000011 0%, #001122 50%, #002244 100%);
+    background: linear-gradient(180deg, #f0f8ff 0%, #e6f3ff 50%, #d9ecff 100%);
     overflow: hidden;
     margin: 0 auto;
     touch-action: pan-y;
@@ -146,7 +72,6 @@ body::before {
     border: 2px solid #00ffff;
 }
 
-/* テトリス風の中央分割線 */
 #game-area::before {
     content: '';
     position: absolute;
@@ -154,23 +79,10 @@ body::before {
     top: 0;
     bottom: 0;
     width: 2px;
-    background: linear-gradient(180deg, 
-        transparent 0%, 
-        #00ffff 20%, 
-        #ff00ff 50%, 
-        #ffff00 80%, 
-        transparent 100%);
+    background: #00ffff;
     transform: translateX(-50%);
     z-index: 1;
-    box-shadow: 
-        0 0 10px #00ffff,
-        0 0 20px rgba(0, 255, 255, 0.5);
-    animation: linePulse 2s ease-in-out infinite;
-}
-
-@keyframes linePulse {
-    0%, 100% { opacity: 0.8; }
-    50% { opacity: 1; }
+    box-shadow: 0 0 10px #00ffff;
 }
 
 /* 点線バージョンも追加（コメントアウト状態） */
@@ -201,42 +113,11 @@ body::before {
     min-font-size: 70px;
     font-weight: 900;
     text-shadow: 
-        0 0 10px currentColor,
-        0 0 20px currentColor,
-        0 0 30px currentColor;
+        2px 2px 4px rgba(0, 0, 0, 0.8),
+        0 0 8px currentColor;
     user-select: none;
     z-index: 2;
     font-family: 'Courier New', 'Monaco', monospace;
-    animation: charGlow 1s ease-in-out infinite alternate;
-}
-
-@keyframes charGlow {
-    0% { 
-        filter: brightness(1) drop-shadow(0 0 5px currentColor);
-    }
-    100% { 
-        filter: brightness(1.2) drop-shadow(0 0 15px currentColor);
-    }
-}
-
-/* 黒文字用のネオンエフェクト */
-.falling-char[style*="rgb(0, 0, 0)"],
-.falling-char[style*="#000000"] {
-    color: #00ffff !important;
-    text-shadow: 
-        0 0 10px #00ffff,
-        0 0 20px #00ffff,
-        0 0 30px #00ffff !important;
-}
-
-/* 赤文字用のネオンエフェクト */
-.falling-char[style*="rgb(255, 71, 87)"],
-.falling-char[style*="#ff4757"] {
-    color: #ff00ff !important;
-    text-shadow: 
-        0 0 10px #ff00ff,
-        0 0 20px #ff00ff,
-        0 0 30px #ff00ff !important;
 }
 
 #instructions {
@@ -263,12 +144,11 @@ body::before {
 #instructions p::before {
     content: '>';
     position: absolute;
-    left: -2px;
+    left: 8px;
     top: 50%;
     transform: translateY(-50%);
     color: #00ffff;
     font-weight: bold;
-    text-shadow: 0 0 5px #00ffff;
 }
 
 #start-btn {
