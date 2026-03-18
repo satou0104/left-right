@@ -79,10 +79,10 @@ body::before {
     top: 0;
     bottom: 0;
     width: 2px;
-    background: #00ffff;
+    background: #333333;
     transform: translateX(-50%);
     z-index: 1;
-    box-shadow: 0 0 10px #00ffff;
+    box-shadow: 0 0 4px rgba(51, 51, 51, 0.5);
 }
 
 /* 点線バージョンも追加（コメントアウト状態） */
@@ -108,9 +108,9 @@ body::before {
 
 .falling-char {
     position: absolute;
-    font-size: 8vw;
-    max-font-size: 100px;
-    min-font-size: 70px;
+    font-size: 10vw;
+    max-font-size: 120px;
+    min-font-size: 80px;
     font-weight: 900;
     text-shadow: 
         2px 2px 4px rgba(0, 0, 0, 0.8),
@@ -222,9 +222,9 @@ body::before {
     }
     
     .falling-char {
-        font-size: 10vw;
-        max-font-size: 90px;
-        min-font-size: 65px;
+        font-size: 12vw;
+        max-font-size: 110px;
+        min-font-size: 75px;
     }
     
     #instructions {
@@ -255,9 +255,9 @@ body::before {
     }
     
     .falling-char {
-        font-size: 12vw;
-        max-font-size: 80px;
-        min-font-size: 60px;
+        font-size: 14vw;
+        max-font-size: 100px;
+        min-font-size: 70px;
     }
     
     #instructions {

@@ -8,10 +8,10 @@ class FallingGame {
         this.gameRunning = false;
         this.fallingChars = [];
         this.gameSpeed = 2;
-        this.spawnRate = 0.035;
-        this.lastSpawnColumn = null; // 最後に生成した列を記録
-        this.columnCooldown = 0; // 列のクールダウン時間
-        this.lastSpawnTime = 0; // 最後に文字を生成した時間
+        this.spawnInterval = null; // setIntervalのID
+        this.spawnDelay = 1000; // 初期生成間隔（1秒）
+        this.lastSpawnColumn = null;
+        this.lastSpawnTime = 0;
         
         this.init();
     }
@@ -55,117 +55,143 @@ class FallingGame {
         this.score = 0;
         this.fallingChars = [];
         this.gameArea.innerHTML = '';
-        this.gameSpeed = 2; // 初期スピードにリセット
-        this.spawnRate = 0.035; // 初期生成率を上げる（テンポアップ）
-        this.lastSpawnColumn = null; // リセット
-        this.columnCooldown = 0; // リセット
-        this.lastSpawnTime = 0; // リセット
+        this.gameSpeed = 2;
+        this.spawnDelay = 1000; // 初期生成間隔にリセット
+        this.lastSpawnColumn = null;
+        this.lastSpawnTime = 0;
         this.updateScore();
         this.startBtn.textContent = 'ゲーム中...';
         this.startBtn.disabled = true;
         
+        // 定期的な文字生成を開始
+        this.startSpawning();
         this.gameLoop();
     }
     
     gameLoop() {
         if (!this.gameRunning) return;
         
-        // クールダウンを減らす
-        if (this.columnCooldown > 0) {
-            this.columnCooldown--;
-        }
-        
-        // 新しい文字を生成
-        if (Math.random() < this.spawnRate) {
-            this.spawnChar();
-        }
-        
         // 文字を移動
         this.updateChars();
-        
-        // ゲーム速度を徐々に上げる
-        if (this.score > 0 && this.score % 20 === 0) {
-            this.gameSpeed = Math.min(this.gameSpeed + 0.05, 5);
-            this.spawnRate = Math.min(this.spawnRate + 0.002, 0.05);
-        }
         
         requestAnimationFrame(() => this.gameLoop());
     }
     
-    spawnChar() {
-            const currentTime = Date.now();
-
-            // 最後の生成から0.2秒（200ms）経過していない場合は生成しない
-            if (currentTime - this.lastSpawnTime < 200) {
-                return;
+    startSpawning() {
+        // 既存のインターバルをクリア
+        if (this.spawnInterval) {
+            clearInterval(this.spawnInterval);
+        }
+        
+        // 新しいインターバルを設定
+        this.spawnInterval = setInterval(() => {
+            if (this.gameRunning) {
+                // Math.randomで左右を決定
+                if (Math.random() < 0.5) {
+                    // 左列に落とす
+                    this.spawnCharInColumn(0);
+                } else {
+                    // 右列に落とす
+                    this.spawnCharInColumn(1);
+                }
             }
-
+        }, this.spawnDelay);
+    }
+    
+    updateSpawnRate() {
+        // 20点ごとにスピードアップ
+        const level = Math.floor(this.score / 20);
+        const newDelay = Math.max(1000 - (level * 100), 300); // 最低0.3秒まで
+        
+        if (newDelay !== this.spawnDelay) {
+            this.spawnDelay = newDelay;
+            this.startSpawning(); // インターバルを再設定
+        }
+        
+        // 落下速度も上げる
+        this.gameSpeed = Math.min(2 + (level * 0.5), 6);
+    }
+    
+    spawnCharInColumn(columnIndex) {
+        const chars = ['左', '右'];
+        const colors = ['#000000', '#ff4757']; // 黒と赤
+        const char = chars[Math.floor(Math.random() * chars.length)];
+        const color = colors[Math.floor(Math.random() * colors.length)];
+        
+        // ゲームエリアの幅に応じて列の位置を計算
+        const gameAreaWidth = this.gameArea.offsetWidth;
+        const leftColumn = gameAreaWidth * 0.20;
+        const rightColumn = gameAreaWidth * 0.80;
+        const columns = [leftColumn, rightColumn];
+        
+        // 指定された列に文字があるかチェック
+        const column = columns[columnIndex];
+        let hasCharInTop = false;
+        for (const charObj of this.fallingChars) {
+            if (Math.abs(charObj.x - column) < 30 && charObj.y < 200) {
+                hasCharInTop = true;
+                break;
+            }
+        }
+        
+        // 文字がある場合は生成しない
+        if (hasCharInTop) {
+            return;
+        }
+        
+        const x = column;
+        
+        const charElement = document.createElement('div');
+        charElement.className = 'falling-char';
+        charElement.textContent = char;
+        charElement.style.left = (x - 60) + 'px';
+        charElement.style.top = '0px';
+        charElement.style.color = color;
+        charElement.dataset.char = char;
+        
+        this.gameArea.appendChild(charElement);
+        this.fallingChars.push({
+            element: charElement,
+            char: char,
+            x: x,
+            y: 0,
+            matched: false
+        });
+    }
+    
+    spawnCharInColumn(columnIndex) {
             const chars = ['左', '右'];
             const colors = ['#000000', '#ff4757']; // 黒と赤
             const char = chars[Math.floor(Math.random() * chars.length)];
             const color = colors[Math.floor(Math.random() * colors.length)];
 
-            // ゲームエリアの幅に応じて列の位置を計算（中央線からもう少し離す）
+            // ゲームエリアの幅に応じて列の位置を計算
             const gameAreaWidth = this.gameArea.offsetWidth;
-            const leftColumn = gameAreaWidth * 0.20; // 左列をもう少し左に（20%）
-            const rightColumn = gameAreaWidth * 0.80; // 右列をもう少し右に（80%）
+            const leftColumn = gameAreaWidth * 0.20;
+            const rightColumn = gameAreaWidth * 0.80;
             const columns = [leftColumn, rightColumn];
-            const availableColumns = [];
 
-            // 各列の上部で文字の重複をチェック（縦の間隔をもっと空ける）
-            for (let i = 0; i < columns.length; i++) {
-                const column = columns[i];
-                let hasCharInTop = false;
-                for (const charObj of this.fallingChars) {
-                    // 文字サイズ2個分程度（約200px）の間隔をつける
-                    if (Math.abs(charObj.x - column) < 30 && charObj.y < 200) {
-                        hasCharInTop = true;
-                        break;
-                    }
-                }
-                if (!hasCharInTop) {
-                    availableColumns.push({column: column, index: i});
+            // 指定された列に文字があるかチェック
+            const column = columns[columnIndex];
+            let hasCharInTop = false;
+            for (const charObj of this.fallingChars) {
+                if (Math.abs(charObj.x - column) < 30 && charObj.y < 200) {
+                    hasCharInTop = true;
+                    break;
                 }
             }
 
-            // 利用可能な列がない場合は生成しない
-            if (availableColumns.length === 0) {
+            // 文字がある場合は生成しない
+            if (hasCharInTop) {
                 return;
             }
 
-            // 前回と同じ列から生成する場合は、追加の時間制限を設ける
-            let selectedColumn;
-            if (this.lastSpawnColumn !== null) {
-                const timeSinceLastSpawn = currentTime - this.lastSpawnTime;
-
-                // 前回と違う列が利用可能な場合は、そちらを優先
-                const otherColumns = availableColumns.filter(col => col.index !== this.lastSpawnColumn);
-                if (otherColumns.length > 0) {
-                    // 違う列から選択
-                    const selectedIndex = Math.floor(Math.random() * otherColumns.length);
-                    selectedColumn = otherColumns[selectedIndex];
-                } else {
-                    // 同じ列しかない場合は、0.5秒以上経過していれば許可
-                    if (timeSinceLastSpawn < 500) {
-                        return;
-                    }
-                    selectedColumn = availableColumns[0];
-                }
-            } else {
-                // 初回はランダム選択
-                const selectedIndex = Math.floor(Math.random() * availableColumns.length);
-                selectedColumn = availableColumns[selectedIndex];
-            }
-
-            const x = selectedColumn.column;
-            this.lastSpawnColumn = selectedColumn.index;
-            this.lastSpawnTime = currentTime; // 生成時間を記録
+            const x = column;
 
             const charElement = document.createElement('div');
             charElement.className = 'falling-char';
             charElement.textContent = char;
-            // 文字の中央が指定位置になるように調整（iPhone用に位置を修正）
-            charElement.style.left = (x - 50) + 'px'; // より大きく左にオフセット
+            charElement.style.left = (x - 50) + 'px';
             charElement.style.top = '0px';
             charElement.style.color = color;
             charElement.dataset.char = char;
@@ -174,11 +200,12 @@ class FallingGame {
             this.fallingChars.push({
                 element: charElement,
                 char: char,
-                x: x, // 実際の中央位置を保存
+                x: x,
                 y: 0,
                 matched: false
             });
         }
+
 
     
     updateChars() {
@@ -273,6 +300,7 @@ class FallingGame {
             
             this.score++;
             this.updateScore();
+            this.updateSpawnRate(); // スコア更新時にスピードチェック
         } else {
             // 間違いの場合：ゲームオーバー
             this.gameOver();
@@ -291,6 +319,13 @@ class FallingGame {
     
     gameOver() {
         this.gameRunning = false;
+        
+        // インターバルをクリア
+        if (this.spawnInterval) {
+            clearInterval(this.spawnInterval);
+            this.spawnInterval = null;
+        }
+        
         this.startBtn.textContent = 'もう一度プレイ';
         this.startBtn.disabled = false;
         
