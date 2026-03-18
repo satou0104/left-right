@@ -108,9 +108,9 @@ body::before {
 
 .falling-char {
     position: absolute;
-    font-size: 10vw;
-    max-font-size: 120px;
-    min-font-size: 80px;
+    font-size: 12vw;
+    max-font-size: 140px;
+    min-font-size: 90px;
     font-weight: 900;
     text-shadow: 
         2px 2px 4px rgba(0, 0, 0, 0.8),
@@ -222,9 +222,9 @@ body::before {
     }
     
     .falling-char {
-        font-size: 12vw;
-        max-font-size: 110px;
-        min-font-size: 75px;
+        font-size: 14vw;
+        max-font-size: 130px;
+        min-font-size: 85px;
     }
     
     #instructions {
@@ -255,9 +255,9 @@ body::before {
     }
     
     .falling-char {
-        font-size: 14vw;
-        max-font-size: 100px;
-        min-font-size: 70px;
+        font-size: 16vw;
+        max-font-size: 120px;
+        min-font-size: 80px;
     }
     
     #instructions {
