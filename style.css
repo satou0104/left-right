@@ -269,3 +269,29 @@ body::before {
         border-radius: 8px;
     }
 }
+/* 正解時の光るエフェクト */
+.flash-left, .flash-right {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 50%;
+    background: rgba(255, 255, 0, 0.3);
+    pointer-events: none;
+    z-index: 3;
+    opacity: 0;
+    animation: flashEffect 0.3s ease-out;
+}
+
+.flash-left {
+    left: 0;
+}
+
+.flash-right {
+    right: 0;
+}
+
+@keyframes flashEffect {
+    0% { opacity: 0; }
+    50% { opacity: 1; }
+    100% { opacity: 0; }
+}

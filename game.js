@@ -277,6 +277,9 @@ class FallingGame {
             const charElement = bottomMostChar.element;
             charElement.style.color = '#2ed573';
             
+            // 正解時の光るエフェクトを追加
+            this.showFlashEffect(direction);
+            
             // 押されたキーの方向にはけるアニメーション
             const moveDirection = direction === 'left' ? -200 : 200;
             charElement.style.transition = 'transform 0.3s ease-out, opacity 0.3s ease-out';
@@ -290,6 +293,21 @@ class FallingGame {
             // 間違いの場合：ゲームオーバー
             this.gameOver();
         }
+    }
+    
+    showFlashEffect(direction) {
+        // 光るエフェクト要素を作成
+        const flashElement = document.createElement('div');
+        flashElement.className = direction === 'left' ? 'flash-left' : 'flash-right';
+        
+        this.gameArea.appendChild(flashElement);
+        
+        // アニメーション終了後に要素を削除
+        setTimeout(() => {
+            if (this.gameArea.contains(flashElement)) {
+                this.gameArea.removeChild(flashElement);
+            }
+        }, 300);
     }
     
     removeChar(index) {
