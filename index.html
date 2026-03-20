@@ -14,6 +14,7 @@
             <div id="menu-buttons">
                 <button id="start-menu-btn" class="menu-btn">スタート</button>
                 <button id="start-hard-btn" class="menu-btn hard-btn">ハードモード</button>
+                <button id="highscore-btn" class="menu-btn">ハイスコア</button>
                 <button id="instructions-btn" class="menu-btn">操作説明</button>
                 <button id="settings-btn" class="menu-btn">設定</button>
             </div>
@@ -67,6 +68,21 @@
                 <p>設定項目は今後追加予定です</p>
             </div>
             <button id="back-from-settings-btn" class="back-btn">戻る</button>
+        </div>
+    </div>
+
+    <!-- ハイスコア画面 -->
+    <div id="highscore-screen" class="screen hidden">
+        <div id="highscore-container">
+            <h2>ハイスコア</h2>
+            <div class="mode-tabs">
+                <button id="normal-tab" class="tab-btn active">ノーマル</button>
+                <button id="hard-tab" class="tab-btn">ハード</button>
+            </div>
+            <div id="highscore-list" class="highscore-content">
+                <!-- ハイスコアリストがここに表示される -->
+            </div>
+            <button id="back-from-highscore-btn" class="back-btn">戻る</button>
         </div>
     </div>
 

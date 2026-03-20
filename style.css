@@ -481,3 +481,143 @@ html::before {
         padding: 20px;
     }
 }
+
+/* ハイスコア画面 */
+.mode-tabs {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+    justify-content: center;
+}
+
+.tab-btn {
+    background: rgba(0, 0, 0, 0.5);
+    color: #00ffff;
+    border: 2px solid #00ffff;
+    padding: 10px 20px;
+    font-size: 16px;
+    font-weight: 700;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+    font-family: 'Courier New', monospace;
+}
+
+.tab-btn.active {
+    background: linear-gradient(145deg, #001122 0%, #003366 50%, #001122 100%);
+    box-shadow: 0 0 15px rgba(0, 255, 255, 0.5);
+}
+
+.tab-btn:hover {
+    transform: translateY(-2px);
+}
+
+.highscore-content {
+    min-height: 300px;
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.no-scores {
+    text-align: center;
+    color: #888;
+    padding: 40px 20px;
+    font-size: 16px;
+}
+
+.score-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.score-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 16px;
+    margin-bottom: 8px;
+    background: rgba(0, 255, 255, 0.1);
+    border-radius: 4px;
+    border-left: 4px solid #00ffff;
+}
+
+.score-item .rank {
+    font-size: 20px;
+    font-weight: 700;
+    color: #00ffff;
+    min-width: 40px;
+}
+
+.score-item .score-value {
+    flex: 1;
+    font-size: 18px;
+    font-weight: 700;
+    color: #ffffff;
+    text-align: center;
+}
+
+.score-item .score-date {
+    font-size: 14px;
+    color: #888;
+    min-width: 60px;
+    text-align: right;
+}
+
+/* トップ3のスタイル */
+.score-item:nth-child(1) {
+    background: rgba(255, 215, 0, 0.2);
+    border-left-color: #ffd700;
+}
+
+.score-item:nth-child(1) .rank {
+    color: #ffd700;
+}
+
+.score-item:nth-child(2) {
+    background: rgba(192, 192, 192, 0.2);
+    border-left-color: #c0c0c0;
+}
+
+.score-item:nth-child(2) .rank {
+    color: #c0c0c0;
+}
+
+.score-item:nth-child(3) {
+    background: rgba(205, 127, 50, 0.2);
+    border-left-color: #cd7f32;
+}
+
+.score-item:nth-child(3) .rank {
+    color: #cd7f32;
+}
+
+/* レスポンシブ対応 */
+@media screen and (max-width: 480px) {
+    #highscore-container {
+        padding: 20px;
+    }
+    
+    .score-item {
+        padding: 10px 12px;
+    }
+    
+    .score-item .rank {
+        font-size: 18px;
+        min-width: 35px;
+    }
+    
+    .score-item .score-value {
+        font-size: 16px;
+    }
+    
+    .score-item .score-date {
+        font-size: 12px;
+        min-width: 50px;
+    }
+}

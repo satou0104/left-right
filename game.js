@@ -13,6 +13,7 @@ class FallingGame {
         this.lastSpawnColumn = null;
         this.lastSpawnTime = 0;
         this.isHardMode = false; // ハードモードフラグ
+        this.currentTab = 'normal'; // ハイスコア画面のタブ
         
         this.init();
         this.initScreenNavigation();
@@ -57,7 +58,7 @@ class FallingGame {
         this.score = 0;
         this.fallingChars = [];
         this.gameArea.innerHTML = '';
-        this.gameSpeed = 2;
+        this.gameSpeed = 3; // 初期速度を2から3に上げる
         
         // ハードモードの場合は0.5秒から、ノーマルは1秒から
         this.spawnDelay = this.isHardMode ? 500 : 1000;
@@ -68,11 +69,12 @@ class FallingGame {
         this.startBtn.textContent = 'ゲーム中...';
         this.startBtn.disabled = true;
         
-        // ハードモードの場合は背景色を変更
+        // ハードモードの場合は外枠の背景色を変更
+        const gameContainer = document.getElementById('game-container');
         if (this.isHardMode) {
-            this.gameArea.style.background = 'linear-gradient(180deg, #fff0f0 0%, #ffe6e6 50%, #ffd9d9 100%)';
+            gameContainer.style.background = 'rgba(40, 0, 0, 0.8)';
         } else {
-            this.gameArea.style.background = 'linear-gradient(180deg, #f0f8ff 0%, #e6f3ff 50%, #d9ecff 100%)';
+            gameContainer.style.background = 'rgba(0, 0, 0, 0.8)';
         }
         
         // 定期的な文字生成を開始
@@ -137,8 +139,8 @@ class FallingGame {
                 this.startSpawning();
             }
             
-            // 落下速度も上げる
-            this.gameSpeed = Math.min(2 + (level * 0.5), 8);
+            // 落下速度も上げる（初期3 + レベルごとに0.6、最大10）
+            this.gameSpeed = Math.min(3 + (level * 0.6), 10);
         } else {
             // ノーマルモード: 20点ごとにスピードアップ
             const level = Math.floor(this.score / 20);
@@ -149,8 +151,8 @@ class FallingGame {
                 this.startSpawning(); // インターバルを再設定
             }
             
-            // 落下速度も上げる
-            this.gameSpeed = Math.min(2 + (level * 0.5), 6);
+            // 落下速度も上げる（初期3 + レベルごとに0.5、最大8）
+            this.gameSpeed = Math.min(3 + (level * 0.5), 8);
         }
     }
     
@@ -168,6 +170,16 @@ class FallingGame {
         const columns = [leftColumn, rightColumn];
 
         const x = columns[columnIndex];
+        
+        // 同じ列の上部（200px以内）に文字があるかチェック
+        const hasCharInTop = this.fallingChars.some(charObj => {
+            return Math.abs(charObj.x - x) < 50 && charObj.y < 200;
+        });
+        
+        // 上部に文字がある場合は生成しない
+        if (hasCharInTop) {
+            return;
+        }
 
         const charElement = document.createElement('div');
         charElement.className = 'falling-char';
@@ -311,6 +323,7 @@ class FallingGame {
         // メニューボタンのイベントリスナー
         const startMenuBtn = document.getElementById('start-menu-btn');
         const startHardBtn = document.getElementById('start-hard-btn');
+        const highscoreBtn = document.getElementById('highscore-btn');
         const instructionsBtn = document.getElementById('instructions-btn');
         const settingsBtn = document.getElementById('settings-btn');
         
@@ -335,6 +348,16 @@ class FallingGame {
             this.showScreen('game-screen');
         });
         
+        highscoreBtn.addEventListener('click', () => {
+            this.showScreen('highscore-screen');
+            this.displayHighScores();
+        });
+        highscoreBtn.addEventListener('touchend', (e) => {
+            e.preventDefault();
+            this.showScreen('highscore-screen');
+            this.displayHighScores();
+        });
+        
         instructionsBtn.addEventListener('click', () => {
             this.showScreen('instructions-screen');
         });
@@ -351,10 +374,43 @@ class FallingGame {
             this.showScreen('settings-screen');
         });
         
+        // ハイスコアタブのイベントリスナー
+        const normalTab = document.getElementById('normal-tab');
+        const hardTab = document.getElementById('hard-tab');
+        
+        normalTab.addEventListener('click', () => {
+            this.currentTab = 'normal';
+            normalTab.classList.add('active');
+            hardTab.classList.remove('active');
+            this.displayHighScores();
+        });
+        normalTab.addEventListener('touchend', (e) => {
+            e.preventDefault();
+            this.currentTab = 'normal';
+            normalTab.classList.add('active');
+            hardTab.classList.remove('active');
+            this.displayHighScores();
+        });
+        
+        hardTab.addEventListener('click', () => {
+            this.currentTab = 'hard';
+            hardTab.classList.add('active');
+            normalTab.classList.remove('active');
+            this.displayHighScores();
+        });
+        hardTab.addEventListener('touchend', (e) => {
+            e.preventDefault();
+            this.currentTab = 'hard';
+            hardTab.classList.add('active');
+            normalTab.classList.remove('active');
+            this.displayHighScores();
+        });
+        
         // 戻るボタンのイベントリスナー
         const backToMenuBtn = document.getElementById('back-to-menu-btn');
         const backFromInstructionsBtn = document.getElementById('back-from-instructions-btn');
         const backFromSettingsBtn = document.getElementById('back-from-settings-btn');
+        const backFromHighscoreBtn = document.getElementById('back-from-highscore-btn');
         
         backToMenuBtn.addEventListener('click', () => {
             this.showScreen('main-menu');
@@ -378,6 +434,14 @@ class FallingGame {
             this.showScreen('main-menu');
         });
         backFromSettingsBtn.addEventListener('touchend', (e) => {
+            e.preventDefault();
+            this.showScreen('main-menu');
+        });
+        
+        backFromHighscoreBtn.addEventListener('click', () => {
+            this.showScreen('main-menu');
+        });
+        backFromHighscoreBtn.addEventListener('touchend', (e) => {
             e.preventDefault();
             this.showScreen('main-menu');
         });
@@ -430,6 +494,9 @@ class FallingGame {
             this.spawnInterval = null;
         }
         
+        // ハイスコアを保存
+        this.saveHighScore(this.score);
+        
         this.startBtn.textContent = 'リトライ';
         this.startBtn.disabled = false;
         
@@ -461,6 +528,60 @@ class FallingGame {
                 this.gameArea.removeChild(gameOverDiv);
             }
         }, 3000);
+    }
+    
+    saveHighScore(score) {
+        const mode = this.isHardMode ? 'hard' : 'normal';
+        const key = `highscores_${mode}`;
+        
+        // 既存のハイスコアを取得
+        let highscores = JSON.parse(localStorage.getItem(key) || '[]');
+        
+        // 新しいスコアを追加
+        highscores.push({
+            score: score,
+            date: new Date().toISOString()
+        });
+        
+        // スコアでソート（降順）
+        highscores.sort((a, b) => b.score - a.score);
+        
+        // トップ10のみ保持
+        highscores = highscores.slice(0, 10);
+        
+        // 保存
+        localStorage.setItem(key, JSON.stringify(highscores));
+    }
+    
+    getHighScores(mode) {
+        const key = `highscores_${mode}`;
+        return JSON.parse(localStorage.getItem(key) || '[]');
+    }
+    
+    displayHighScores() {
+        const highscoreList = document.getElementById('highscore-list');
+        const scores = this.getHighScores(this.currentTab);
+        
+        if (scores.length === 0) {
+            highscoreList.innerHTML = '<p class="no-scores">まだスコアがありません</p>';
+            return;
+        }
+        
+        let html = '<ol class="score-list">';
+        scores.forEach((item, index) => {
+            const date = new Date(item.date);
+            const dateStr = `${date.getMonth() + 1}/${date.getDate()}`;
+            html += `
+                <li class="score-item">
+                    <span class="rank">${index + 1}</span>
+                    <span class="score-value">${item.score}点</span>
+                    <span class="score-date">${dateStr}</span>
+                </li>
+            `;
+        });
+        html += '</ol>';
+        
+        highscoreList.innerHTML = html;
     }
 }
 
