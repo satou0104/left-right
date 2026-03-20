@@ -12,6 +12,7 @@ class FallingGame {
         this.spawnDelay = 1000; // 初期生成間隔（1秒）
         this.lastSpawnColumn = null;
         this.lastSpawnTime = 0;
+        this.isHardMode = false; // ハードモードフラグ
         
         this.init();
         this.initScreenNavigation();
@@ -57,12 +58,22 @@ class FallingGame {
         this.fallingChars = [];
         this.gameArea.innerHTML = '';
         this.gameSpeed = 2;
-        this.spawnDelay = 1000; // 初期生成間隔にリセット
+        
+        // ハードモードの場合は0.5秒から、ノーマルは1秒から
+        this.spawnDelay = this.isHardMode ? 500 : 1000;
+        
         this.lastSpawnColumn = null;
         this.lastSpawnTime = 0;
         this.updateScore();
         this.startBtn.textContent = 'ゲーム中...';
         this.startBtn.disabled = true;
+        
+        // ハードモードの場合は背景色を変更
+        if (this.isHardMode) {
+            this.gameArea.style.background = 'linear-gradient(180deg, #fff0f0 0%, #ffe6e6 50%, #ffd9d9 100%)';
+        } else {
+            this.gameArea.style.background = 'linear-gradient(180deg, #f0f8ff 0%, #e6f3ff 50%, #d9ecff 100%)';
+        }
         
         // 定期的な文字生成を開始
         this.startSpawning();
@@ -100,17 +111,47 @@ class FallingGame {
     }
     
     updateSpawnRate() {
-        // 20点ごとにスピードアップ
-        const level = Math.floor(this.score / 20);
-        const newDelay = Math.max(1000 - (level * 100), 300); // 最低0.3秒まで
-        
-        if (newDelay !== this.spawnDelay) {
-            this.spawnDelay = newDelay;
-            this.startSpawning(); // インターバルを再設定
+        if (this.isHardMode) {
+            // ハードモード: より細かいレベル設定
+            const level = Math.floor(this.score / 20);
+            let newDelay;
+            
+            if (this.score >= 200) {
+                newDelay = 150; // レベル10: 0.15秒
+            } else if (this.score >= 180) {
+                newDelay = 200; // レベル9: 0.2秒
+            } else if (this.score >= 160) {
+                newDelay = 250; // レベル8: 0.25秒
+            } else if (this.score >= 140) {
+                newDelay = 300; // レベル7: 0.3秒
+            } else if (this.score >= 120) {
+                newDelay = 400; // レベル6: 0.4秒
+            } else if (this.score >= 100) {
+                newDelay = 500; // レベル5: 0.5秒
+            } else {
+                newDelay = Math.max(500 - (level * 50), 500); // 0-99点は0.5秒固定
+            }
+            
+            if (newDelay !== this.spawnDelay) {
+                this.spawnDelay = newDelay;
+                this.startSpawning();
+            }
+            
+            // 落下速度も上げる
+            this.gameSpeed = Math.min(2 + (level * 0.5), 8);
+        } else {
+            // ノーマルモード: 20点ごとにスピードアップ
+            const level = Math.floor(this.score / 20);
+            const newDelay = Math.max(1000 - (level * 100), 300); // 最低0.3秒まで
+            
+            if (newDelay !== this.spawnDelay) {
+                this.spawnDelay = newDelay;
+                this.startSpawning(); // インターバルを再設定
+            }
+            
+            // 落下速度も上げる
+            this.gameSpeed = Math.min(2 + (level * 0.5), 6);
         }
-        
-        // 落下速度も上げる
-        this.gameSpeed = Math.min(2 + (level * 0.5), 6);
     }
     
     spawnCharInColumn(columnIndex) {
@@ -269,15 +310,28 @@ class FallingGame {
     initScreenNavigation() {
         // メニューボタンのイベントリスナー
         const startMenuBtn = document.getElementById('start-menu-btn');
+        const startHardBtn = document.getElementById('start-hard-btn');
         const instructionsBtn = document.getElementById('instructions-btn');
         const settingsBtn = document.getElementById('settings-btn');
         
         // クリックとタッチイベントの両方を追加
         startMenuBtn.addEventListener('click', () => {
+            this.isHardMode = false;
             this.showScreen('game-screen');
         });
         startMenuBtn.addEventListener('touchend', (e) => {
             e.preventDefault();
+            this.isHardMode = false;
+            this.showScreen('game-screen');
+        });
+        
+        startHardBtn.addEventListener('click', () => {
+            this.isHardMode = true;
+            this.showScreen('game-screen');
+        });
+        startHardBtn.addEventListener('touchend', (e) => {
+            e.preventDefault();
+            this.isHardMode = true;
             this.showScreen('game-screen');
         });
         
@@ -348,6 +402,10 @@ class FallingGame {
         this.score = 0;
         this.fallingChars = [];
         this.gameArea.innerHTML = '';
+        
+        // 背景色をノーマルに戻す
+        this.gameArea.style.background = 'linear-gradient(180deg, #f0f8ff 0%, #e6f3ff 50%, #d9ecff 100%)';
+        
         this.updateScore();
         this.startBtn.textContent = 'ゲーム開始';
         this.startBtn.disabled = false;
