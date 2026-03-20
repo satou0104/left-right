@@ -372,7 +372,7 @@ class FallingGame {
             this.spawnInterval = null;
         }
         
-        this.startBtn.textContent = 'もう一度プレイ';
+        this.startBtn.textContent = 'リトライ';
         this.startBtn.disabled = false;
         
         // ゲームオーバー表示
