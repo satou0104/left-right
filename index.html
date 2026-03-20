@@ -7,15 +7,68 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div id="game-container">
-        <div id="score">スコア: <span id="score-value">0</span></div>
-        <div id="game-area"></div>
-        <div id="instructions">
-            <p>黒文字：文字通り<br>（「左」→左枠タッチ、「右」→右枠タッチ）</p>
-            <p><span style="color: #ff4757;">赤文字</span>：位置で判断<br>（左列→左枠タッチ、右列→右枠タッチ）</p>
-            <button id="start-btn">ゲーム開始</button>
+    <!-- メイン画面 -->
+    <div id="main-menu" class="screen">
+        <div id="main-container">
+            <h1 id="game-title">左右落下ゲーム</h1>
+            <div id="menu-buttons">
+                <button id="start-menu-btn" class="menu-btn">スタート</button>
+                <button id="instructions-btn" class="menu-btn">操作説明</button>
+                <button id="settings-btn" class="menu-btn">設定</button>
+            </div>
         </div>
     </div>
+
+    <!-- ゲーム画面 -->
+    <div id="game-screen" class="screen hidden">
+        <div id="game-container">
+            <div id="score">スコア: <span id="score-value">0</span></div>
+            <div id="game-area"></div>
+            <div id="game-controls">
+                <button id="start-btn">ゲーム開始</button>
+                <button id="back-to-menu-btn" class="back-btn">メニューに戻る</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 操作説明画面 -->
+    <div id="instructions-screen" class="screen hidden">
+        <div id="instructions-container">
+            <h2>操作説明</h2>
+            <div class="instruction-content">
+                <h3>基本操作</h3>
+                <p>画面を左右にタッチして文字を消します</p>
+                
+                <h3>文字の種類</h3>
+                <div class="rule-item">
+                    <strong>黒文字：</strong>文字通りに操作<br>
+                    「左」→左枠タッチ、「右」→右枠タッチ
+                </div>
+                <div class="rule-item">
+                    <strong style="color: #ff4757;">赤文字：</strong>位置で判断<br>
+                    左列→左枠タッチ、右列→右枠タッチ
+                </div>
+                
+                <h3>ゲームルール</h3>
+                <p>・文字が画面下に到達する前に正しく操作する</p>
+                <p>・間違った操作をするとゲームオーバー</p>
+                <p>・20点ごとにスピードアップ</p>
+            </div>
+            <button id="back-from-instructions-btn" class="back-btn">戻る</button>
+        </div>
+    </div>
+
+    <!-- 設定画面 -->
+    <div id="settings-screen" class="screen hidden">
+        <div id="settings-container">
+            <h2>設定</h2>
+            <div class="settings-content">
+                <p>設定項目は今後追加予定です</p>
+            </div>
+            <button id="back-from-settings-btn" class="back-btn">戻る</button>
+        </div>
+    </div>
+
     <script src="game.js"></script>
 </body>
 </html>

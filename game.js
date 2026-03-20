@@ -14,6 +14,7 @@ class FallingGame {
         this.lastSpawnTime = 0;
         
         this.init();
+        this.initScreenNavigation();
     }
     
     init() {
@@ -117,15 +118,15 @@ class FallingGame {
         const colors = ['#000000', '#ff4757']; // 黒と赤
         const char = chars[Math.floor(Math.random() * chars.length)];
         const color = colors[Math.floor(Math.random() * colors.length)];
-        
+
         // ゲームエリアの幅に応じて列の位置を計算
         const gameAreaWidth = this.gameArea.offsetWidth;
         const leftColumn = gameAreaWidth * 0.25; // 左列を右にずらす（20% → 25%）
         const rightColumn = gameAreaWidth * 0.80;
         const columns = [leftColumn, rightColumn];
-        
+
         const x = columns[columnIndex];
-        
+
         const charElement = document.createElement('div');
         charElement.className = 'falling-char';
         charElement.textContent = char;
@@ -133,7 +134,7 @@ class FallingGame {
         charElement.style.top = '0px';
         charElement.style.color = color;
         charElement.dataset.char = char;
-        
+
         this.gameArea.appendChild(charElement);
         this.fallingChars.push({
             element: charElement,
@@ -143,53 +144,6 @@ class FallingGame {
             matched: false
         });
     }
-    
-    spawnCharInColumn(columnIndex) {
-            const chars = ['左', '右'];
-            const colors = ['#000000', '#ff4757']; // 黒と赤
-            const char = chars[Math.floor(Math.random() * chars.length)];
-            const color = colors[Math.floor(Math.random() * colors.length)];
-
-            // ゲームエリアの幅に応じて列の位置を計算
-            const gameAreaWidth = this.gameArea.offsetWidth;
-            const leftColumn = gameAreaWidth * 0.20;
-            const rightColumn = gameAreaWidth * 0.80;
-            const columns = [leftColumn, rightColumn];
-
-            // 指定された列に文字があるかチェック
-            const column = columns[columnIndex];
-            let hasCharInTop = false;
-            for (const charObj of this.fallingChars) {
-                if (Math.abs(charObj.x - column) < 30 && charObj.y < 200) {
-                    hasCharInTop = true;
-                    break;
-                }
-            }
-
-            // 文字がある場合は生成しない
-            if (hasCharInTop) {
-                return;
-            }
-
-            const x = column;
-
-            const charElement = document.createElement('div');
-            charElement.className = 'falling-char';
-            charElement.textContent = char;
-            charElement.style.left = (x - 50) + 'px';
-            charElement.style.top = '0px';
-            charElement.style.color = color;
-            charElement.dataset.char = char;
-
-            this.gameArea.appendChild(charElement);
-            this.fallingChars.push({
-                element: charElement,
-                char: char,
-                x: x,
-                y: 0,
-                matched: false
-            });
-        }
 
 
     
@@ -308,6 +262,93 @@ class FallingGame {
                 this.gameArea.removeChild(flashElement);
             }
         }, 300);
+    }
+    
+    initScreenNavigation() {
+        // メニューボタンのイベントリスナー
+        const startMenuBtn = document.getElementById('start-menu-btn');
+        const instructionsBtn = document.getElementById('instructions-btn');
+        const settingsBtn = document.getElementById('settings-btn');
+        
+        // クリックとタッチイベントの両方を追加
+        startMenuBtn.addEventListener('click', () => {
+            this.showScreen('game-screen');
+        });
+        startMenuBtn.addEventListener('touchend', (e) => {
+            e.preventDefault();
+            this.showScreen('game-screen');
+        });
+        
+        instructionsBtn.addEventListener('click', () => {
+            this.showScreen('instructions-screen');
+        });
+        instructionsBtn.addEventListener('touchend', (e) => {
+            e.preventDefault();
+            this.showScreen('instructions-screen');
+        });
+        
+        settingsBtn.addEventListener('click', () => {
+            this.showScreen('settings-screen');
+        });
+        settingsBtn.addEventListener('touchend', (e) => {
+            e.preventDefault();
+            this.showScreen('settings-screen');
+        });
+        
+        // 戻るボタンのイベントリスナー
+        const backToMenuBtn = document.getElementById('back-to-menu-btn');
+        const backFromInstructionsBtn = document.getElementById('back-from-instructions-btn');
+        const backFromSettingsBtn = document.getElementById('back-from-settings-btn');
+        
+        backToMenuBtn.addEventListener('click', () => {
+            this.showScreen('main-menu');
+            this.resetGame();
+        });
+        backToMenuBtn.addEventListener('touchend', (e) => {
+            e.preventDefault();
+            this.showScreen('main-menu');
+            this.resetGame();
+        });
+        
+        backFromInstructionsBtn.addEventListener('click', () => {
+            this.showScreen('main-menu');
+        });
+        backFromInstructionsBtn.addEventListener('touchend', (e) => {
+            e.preventDefault();
+            this.showScreen('main-menu');
+        });
+        
+        backFromSettingsBtn.addEventListener('click', () => {
+            this.showScreen('main-menu');
+        });
+        backFromSettingsBtn.addEventListener('touchend', (e) => {
+            e.preventDefault();
+            this.showScreen('main-menu');
+        });
+    }
+    
+    showScreen(screenId) {
+        // すべての画面を非表示
+        const screens = document.querySelectorAll('.screen');
+        screens.forEach(screen => screen.classList.add('hidden'));
+        
+        // 指定された画面を表示
+        document.getElementById(screenId).classList.remove('hidden');
+    }
+    
+    resetGame() {
+        // ゲームをリセット
+        this.gameRunning = false;
+        if (this.spawnInterval) {
+            clearInterval(this.spawnInterval);
+            this.spawnInterval = null;
+        }
+        this.score = 0;
+        this.fallingChars = [];
+        this.gameArea.innerHTML = '';
+        this.updateScore();
+        this.startBtn.textContent = 'ゲーム開始';
+        this.startBtn.disabled = false;
     }
     
     removeChar(index) {

@@ -9,6 +9,9 @@ body {
     min-height: 100vh;
     -webkit-touch-callout: none;
     -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
     -webkit-tap-highlight-color: transparent;
     position: relative;
 }
@@ -108,9 +111,7 @@ body::before {
 
 .falling-char {
     position: absolute;
-    font-size: 12vw;
-    max-font-size: 140px;
-    min-font-size: 90px;
+    font-size: clamp(80px, 12vw, 140px);
     font-weight: 900;
     text-shadow: 
         2px 2px 4px rgba(0, 0, 0, 0.8),
@@ -120,35 +121,12 @@ body::before {
     font-family: 'Courier New', 'Monaco', monospace;
 }
 
-#instructions {
+#game-controls {
     margin-top: 20px;
-    color: #ffffff;
-    font-weight: 500;
-    line-height: 1.6;
-    font-family: 'Courier New', monospace;
-}
-
-#instructions p {
-    margin: 12px 0;
-    padding: 12px 16px;
-    background: rgba(0, 0, 0, 0.6);
-    border-radius: 4px;
-    border-left: 4px solid #00ffff;
-    box-shadow: 
-        0 0 10px rgba(0, 255, 255, 0.3),
-        inset 0 1px 0 rgba(0, 255, 255, 0.2);
-    position: relative;
-    border: 1px solid rgba(0, 255, 255, 0.3);
-}
-
-#instructions p::before {
-    content: '>';
-    position: absolute;
-    left: 8px;
-    top: 50%;
-    transform: translateY(-50%);
-    color: #00ffff;
-    font-weight: bold;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    align-items: center;
 }
 
 #start-btn {
@@ -163,6 +141,8 @@ body::before {
     margin-top: 16px;
     transition: all 0.3s ease;
     -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
     -webkit-tap-highlight-color: transparent;
     touch-action: manipulation;
     box-shadow: 
@@ -222,20 +202,12 @@ body::before {
     }
     
     .falling-char {
-        font-size: 14vw;
-        max-font-size: 130px;
-        min-font-size: 85px;
+        font-size: clamp(85px, 14vw, 130px);
     }
     
-    #instructions {
-        font-size: 14px;
+    #game-controls {
         margin-top: 15px;
-    }
-    
-    #instructions p {
-        margin: 8px 0;
-        padding: 10px 12px;
-        border-radius: 10px;
+        gap: 12px;
     }
     
     #start-btn {
@@ -255,18 +227,12 @@ body::before {
     }
     
     .falling-char {
-        font-size: 16vw;
-        max-font-size: 120px;
-        min-font-size: 80px;
+        font-size: clamp(80px, 16vw, 120px);
     }
     
-    #instructions {
-        font-size: 12px;
-    }
-    
-    #instructions p {
-        padding: 8px 10px;
-        border-radius: 8px;
+    #game-controls {
+        margin-top: 12px;
+        gap: 10px;
     }
 }
 /* 正解時の光るエフェクト */
@@ -294,4 +260,180 @@ body::before {
     0% { opacity: 0; }
     50% { opacity: 1; }
     100% { opacity: 0; }
+}
+/* 画面管理 */
+.screen {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    width: 100%;
+}
+
+.hidden {
+    display: none !important;
+}
+
+/* メイン画面 */
+#main-container {
+    background: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(10px);
+    border-radius: 8px;
+    padding: 40px;
+    box-shadow: 0 0 30px rgba(0, 255, 255, 0.3);
+    text-align: center;
+    width: 90%;
+    max-width: 400px;
+    border: 2px solid #00ffff;
+}
+
+#game-title {
+    color: #00ffff;
+    font-size: 28px;
+    font-weight: 700;
+    margin-bottom: 40px;
+    text-shadow: 0 0 10px #00ffff;
+    font-family: 'Courier New', monospace;
+    letter-spacing: 2px;
+}
+
+#menu-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.menu-btn {
+    background: linear-gradient(145deg, #001122 0%, #003366 50%, #001122 100%);
+    color: #00ffff;
+    border: 2px solid #00ffff;
+    padding: 16px 32px;
+    font-size: 18px;
+    font-weight: 700;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+    box-shadow: 0 0 15px rgba(0, 255, 255, 0.3);
+    text-shadow: 0 0 8px #00ffff;
+    font-family: 'Courier New', monospace;
+    letter-spacing: 1px;
+}
+
+.menu-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 0 25px rgba(0, 255, 255, 0.5);
+    background: linear-gradient(145deg, #002244 0%, #004488 50%, #002244 100%);
+}
+
+.menu-btn:active {
+    transform: translateY(1px);
+    box-shadow: 0 0 10px rgba(0, 255, 255, 0.4);
+}
+
+/* 操作説明画面 */
+#instructions-container, #settings-container {
+    background: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(10px);
+    border-radius: 8px;
+    padding: 30px;
+    box-shadow: 0 0 30px rgba(0, 255, 255, 0.3);
+    width: 90%;
+    max-width: 500px;
+    border: 2px solid #00ffff;
+    color: #ffffff;
+    font-family: 'Courier New', monospace;
+}
+
+#instructions-container h2, #settings-container h2 {
+    color: #00ffff;
+    font-size: 24px;
+    margin-bottom: 20px;
+    text-align: center;
+    text-shadow: 0 0 8px #00ffff;
+}
+
+.instruction-content h3 {
+    color: #00ffff;
+    font-size: 18px;
+    margin: 20px 0 10px 0;
+    text-shadow: 0 0 5px #00ffff;
+}
+
+.instruction-content p {
+    margin: 10px 0;
+    line-height: 1.6;
+}
+
+.rule-item {
+    background: rgba(0, 255, 255, 0.1);
+    padding: 12px;
+    margin: 10px 0;
+    border-radius: 4px;
+    border-left: 4px solid #00ffff;
+}
+
+.settings-content {
+    text-align: center;
+    padding: 40px 0;
+    color: #cccccc;
+}
+
+.back-btn {
+    background: linear-gradient(145deg, #220011 0%, #440022 50%, #220011 100%);
+    color: #ff00ff;
+    border: 2px solid #ff00ff;
+    padding: 12px 24px;
+    font-size: 16px;
+    font-weight: 700;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-top: 20px;
+    transition: all 0.3s ease;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+    box-shadow: 0 0 10px rgba(255, 0, 255, 0.3);
+    text-shadow: 0 0 5px #ff00ff;
+    font-family: 'Courier New', monospace;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.back-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 0 20px rgba(255, 0, 255, 0.5);
+}
+
+.back-btn:active {
+    transform: translateY(1px);
+    box-shadow: 0 0 5px rgba(255, 0, 255, 0.4);
+}
+
+/* レスポンシブ対応 */
+@media screen and (max-width: 480px) {
+    #main-container {
+        padding: 30px 20px;
+    }
+    
+    #game-title {
+        font-size: 24px;
+        margin-bottom: 30px;
+    }
+    
+    .menu-btn {
+        font-size: 16px;
+        padding: 14px 28px;
+    }
+    
+    #instructions-container, #settings-container {
+        padding: 20px;
+    }
 }
