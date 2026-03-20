@@ -385,6 +385,14 @@ html::before {
     text-shadow: 0 0 8px #ff4757;
 }
 
+.menu-btn.super-hard-btn {
+    background: linear-gradient(145deg, #330011 0%, #880044 50%, #330011 100%);
+    color: #ff1744;
+    border: 2px solid #ff1744;
+    box-shadow: 0 0 15px rgba(255, 23, 68, 0.4);
+    text-shadow: 0 0 10px #ff1744;
+}
+
 .menu-btn:hover {
     transform: translateY(-2px);
     box-shadow: 0 0 25px rgba(0, 255, 255, 0.5);
@@ -394,6 +402,11 @@ html::before {
 .menu-btn.hard-btn:hover {
     box-shadow: 0 0 25px rgba(255, 71, 87, 0.5);
     background: linear-gradient(145deg, #440022 0%, #880044 50%, #440022 100%);
+}
+
+.menu-btn.super-hard-btn:hover {
+    box-shadow: 0 0 25px rgba(255, 23, 68, 0.6);
+    background: linear-gradient(145deg, #550033 0%, #aa0055 50%, #550033 100%);
 }
 
 .menu-btn:active {

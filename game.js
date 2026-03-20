@@ -14,11 +14,26 @@ class FallingGame {
         this.lastSpawnColumn = null;
         this.lastSpawnTime = 0;
         this.isHardMode = false; // ハードモードフラグ
+        this.isSuperHardMode = false; // スーパーハードモードフラグ
         this.currentTab = 'normal'; // ハイスコア画面のタブ
         this.audioContext = null; // Web Audio API用
         
         this.init();
         this.initScreenNavigation();
+        this.checkSuperHardUnlock();
+    }
+    
+    // スーパーハードのアンロック状態をチェック
+    checkSuperHardUnlock() {
+        const hardScores = this.getHighScores('hard');
+        const hasUnlocked = hardScores.some(score => score.score >= 140);
+        
+        const superHardBtn = document.getElementById('start-super-hard-btn');
+        if (hasUnlocked) {
+            superHardBtn.classList.remove('hidden');
+        } else {
+            superHardBtn.classList.add('hidden');
+        }
     }
     
     // Web Audio APIの初期化
@@ -158,8 +173,14 @@ class FallingGame {
         this.gameArea.innerHTML = '';
         this.gameSpeed = 3; // 初期速度を2から3に上げる
         
-        // ハードモードの場合は0.5秒から、ノーマルは1秒から
-        this.spawnDelay = this.isHardMode ? 500 : 1000;
+        // モードに応じて初期生成間隔を設定
+        if (this.isSuperHardMode) {
+            this.spawnDelay = 300; // スーパーハード: 0.3秒から
+        } else if (this.isHardMode) {
+            this.spawnDelay = 500; // ハード: 0.5秒から
+        } else {
+            this.spawnDelay = 1000; // ノーマル: 1秒から
+        }
         
         this.lastSpawnColumn = null;
         this.lastSpawnTime = 0;
@@ -170,7 +191,9 @@ class FallingGame {
         
         // ハードモードの場合は外枠の背景色を変更
         const gameContainer = document.getElementById('game-container');
-        if (this.isHardMode) {
+        if (this.isSuperHardMode) {
+            gameContainer.style.background = 'rgba(60, 0, 20, 0.8)'; // スーパーハードは濃い赤
+        } else if (this.isHardMode) {
             gameContainer.style.background = 'rgba(40, 0, 0, 0.8)';
         } else {
             gameContainer.style.background = 'rgba(0, 0, 0, 0.8)';
@@ -212,7 +235,39 @@ class FallingGame {
     }
     
     updateSpawnRate() {
-        if (this.isHardMode) {
+        if (this.isSuperHardMode) {
+            // スーパーハードモード: レベル7スタート
+            const level = Math.floor(this.score / 20) + 7; // レベル7から開始
+            let newDelay;
+            
+            if (this.score >= 180) {
+                newDelay = 50; // レベル15: 0.05秒
+            } else if (this.score >= 160) {
+                newDelay = 70; // レベル14: 0.07秒
+            } else if (this.score >= 140) {
+                newDelay = 90; // レベル13: 0.09秒
+            } else if (this.score >= 120) {
+                newDelay = 110; // レベル12: 0.11秒
+            } else if (this.score >= 100) {
+                newDelay = 130; // レベル11: 0.13秒
+            } else if (this.score >= 80) {
+                newDelay = 150; // レベル10: 0.15秒
+            } else if (this.score >= 60) {
+                newDelay = 200; // レベル9: 0.2秒
+            } else if (this.score >= 40) {
+                newDelay = 250; // レベル8: 0.25秒
+            } else {
+                newDelay = 300; // レベル7: 0.3秒
+            }
+            
+            if (newDelay !== this.spawnDelay) {
+                this.spawnDelay = newDelay;
+                this.startSpawning();
+            }
+            
+            // 落下速度も上げる
+            this.gameSpeed = Math.min(3 + (level * 0.7), 12);
+        } else if (this.isHardMode) {
             // ハードモード: より細かいレベル設定
             const level = Math.floor(this.score / 20);
             let newDelay;
@@ -439,21 +494,38 @@ class FallingGame {
         // クリックとタッチイベントの両方を追加
         startMenuBtn.addEventListener('click', () => {
             this.isHardMode = false;
+            this.isSuperHardMode = false;
             this.showScreen('game-screen');
         });
         startMenuBtn.addEventListener('touchend', (e) => {
             e.preventDefault();
             this.isHardMode = false;
+            this.isSuperHardMode = false;
             this.showScreen('game-screen');
         });
         
         startHardBtn.addEventListener('click', () => {
             this.isHardMode = true;
+            this.isSuperHardMode = false;
             this.showScreen('game-screen');
         });
         startHardBtn.addEventListener('touchend', (e) => {
             e.preventDefault();
             this.isHardMode = true;
+            this.isSuperHardMode = false;
+            this.showScreen('game-screen');
+        });
+        
+        const startSuperHardBtn = document.getElementById('start-super-hard-btn');
+        startSuperHardBtn.addEventListener('click', () => {
+            this.isHardMode = false;
+            this.isSuperHardMode = true;
+            this.showScreen('game-screen');
+        });
+        startSuperHardBtn.addEventListener('touchend', (e) => {
+            e.preventDefault();
+            this.isHardMode = false;
+            this.isSuperHardMode = true;
             this.showScreen('game-screen');
         });
         
@@ -602,7 +674,7 @@ class FallingGame {
     }
     
     updateHighScore() {
-        const mode = this.isHardMode ? 'hard' : 'normal';
+        const mode = this.isSuperHardMode ? 'superhard' : (this.isHardMode ? 'hard' : 'normal');
         const scores = this.getHighScores(mode);
         const topScore = scores.length > 0 ? scores[0].score : 0;
         this.highscoreElement.textContent = topScore;
@@ -658,7 +730,7 @@ class FallingGame {
     }
     
     saveHighScore(score) {
-        const mode = this.isHardMode ? 'hard' : 'normal';
+        const mode = this.isSuperHardMode ? 'superhard' : (this.isHardMode ? 'hard' : 'normal');
         const key = `highscores_${mode}`;
         
         // 既存のハイスコアを取得
@@ -678,6 +750,9 @@ class FallingGame {
         
         // 保存
         localStorage.setItem(key, JSON.stringify(highscores));
+        
+        // スーパーハードのアンロック状態を更新
+        this.checkSuperHardUnlock();
     }
     
     getHighScores(mode) {
