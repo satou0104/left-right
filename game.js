@@ -28,8 +28,35 @@ class FallingGame {
         }
     }
     
-    // 正解音（ピコーン）
-    playCorrectSound() {
+    // 正解音（左右で音を変える）
+    playCorrectSound(direction) {
+        if (!this.getSoundEnabled()) return;
+        
+        this.initAudio();
+        
+        // 左は低め、右は高め
+        const frequency = direction === 'left' ? 400 : 600;
+        
+        const oscillator = this.audioContext.createOscillator();
+        const gainNode = this.audioContext.createGain();
+        
+        oscillator.connect(gainNode);
+        gainNode.connect(this.audioContext.destination);
+        
+        oscillator.frequency.value = frequency;
+        oscillator.type = 'sine';
+        
+        gainNode.gain.setValueAtTime(0.3, this.audioContext.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, this.audioContext.currentTime + 0.12);
+        
+        oscillator.start(this.audioContext.currentTime);
+        oscillator.stop(this.audioContext.currentTime + 0.12);
+    }
+    
+    // ミス音（軽いポッ）
+    playErrorSound() {
+        if (!this.getSoundEnabled()) return;
+        
         this.initAudio();
         const oscillator = this.audioContext.createOscillator();
         const gainNode = this.audioContext.createGain();
@@ -37,37 +64,20 @@ class FallingGame {
         oscillator.connect(gainNode);
         gainNode.connect(this.audioContext.destination);
         
-        oscillator.frequency.value = 800;
+        oscillator.frequency.value = 400;
         oscillator.type = 'sine';
         
-        gainNode.gain.setValueAtTime(0.3, this.audioContext.currentTime);
+        gainNode.gain.setValueAtTime(0.2, this.audioContext.currentTime);
         gainNode.gain.exponentialRampToValueAtTime(0.01, this.audioContext.currentTime + 0.1);
         
         oscillator.start(this.audioContext.currentTime);
         oscillator.stop(this.audioContext.currentTime + 0.1);
     }
     
-    // ミス音（ブー）
-    playErrorSound() {
-        this.initAudio();
-        const oscillator = this.audioContext.createOscillator();
-        const gainNode = this.audioContext.createGain();
-        
-        oscillator.connect(gainNode);
-        gainNode.connect(this.audioContext.destination);
-        
-        oscillator.frequency.value = 200;
-        oscillator.type = 'sawtooth';
-        
-        gainNode.gain.setValueAtTime(0.3, this.audioContext.currentTime);
-        gainNode.gain.exponentialRampToValueAtTime(0.01, this.audioContext.currentTime + 0.3);
-        
-        oscillator.start(this.audioContext.currentTime);
-        oscillator.stop(this.audioContext.currentTime + 0.3);
-    }
-    
     // レベルアップ音（ピロリロリーン）
     playLevelUpSound() {
+        if (!this.getSoundEnabled()) return;
+        
         this.initAudio();
         const frequencies = [523, 659, 784, 1047]; // C, E, G, C (高)
         
@@ -88,6 +98,23 @@ class FallingGame {
             oscillator.start(startTime);
             oscillator.stop(startTime + 0.15);
         });
+    }
+    
+    // 音のON/OFF設定を取得
+    getSoundEnabled() {
+        const enabled = localStorage.getItem('soundEnabled');
+        return enabled === null ? true : enabled === 'true';
+    }
+    
+    // 音のON/OFF設定を保存
+    setSoundEnabled(enabled) {
+        localStorage.setItem('soundEnabled', enabled);
+    }
+    
+    // 設定画面を読み込む
+    loadSettings() {
+        const soundToggle = document.getElementById('sound-toggle');
+        soundToggle.checked = this.getSoundEnabled();
     }
     
     init() {
@@ -454,6 +481,13 @@ class FallingGame {
         settingsBtn.addEventListener('touchend', (e) => {
             e.preventDefault();
             this.showScreen('settings-screen');
+            this.loadSettings();
+        });
+        
+        // 設定のトグルスイッチ
+        const soundToggle = document.getElementById('sound-toggle');
+        soundToggle.addEventListener('change', (e) => {
+            this.setSoundEnabled(e.target.checked);
         });
         
         // ハイスコアタブのイベントリスナー
