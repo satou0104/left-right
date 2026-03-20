@@ -160,6 +160,7 @@ html::before {
     letter-spacing: 1px;
     text-transform: uppercase;
     white-space: nowrap;
+    min-width: 160px;
 }
 
 #start-btn:hover {
@@ -430,6 +431,7 @@ html::before {
     text-shadow: 0 0 5px #ff00ff;
     font-family: 'Courier New', monospace;
     white-space: nowrap;
+    min-width: 160px;
 }
 
 .back-btn:hover {
