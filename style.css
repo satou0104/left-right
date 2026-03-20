@@ -46,6 +46,7 @@ html::before {
     text-align: center;
     width: 90%;
     max-width: 450px;
+    min-width: 350px;
     margin: 10px;
     border: 2px solid #00ffff;
     position: relative;
@@ -133,6 +134,7 @@ html::before {
     gap: 15px;
     align-items: center;
     justify-content: center;
+    min-height: 50px;
 }
 
 #start-btn {
