@@ -120,9 +120,10 @@ class FallingGame {
         const color = colors[Math.floor(Math.random() * colors.length)];
 
         // ゲームエリアの幅に応じて列の位置を計算
+        // 真ん中の線（50%）を基準に、左列は25%、右列は75%
         const gameAreaWidth = this.gameArea.offsetWidth;
-        const leftColumn = gameAreaWidth * 0.25; // 左列を右にずらす（20% → 25%）
-        const rightColumn = gameAreaWidth * 0.80;
+        const leftColumn = gameAreaWidth * 0.25;  // 左列の中心
+        const rightColumn = gameAreaWidth * 0.75; // 右列の中心
         const columns = [leftColumn, rightColumn];
 
         const x = columns[columnIndex];
@@ -130,7 +131,7 @@ class FallingGame {
         const charElement = document.createElement('div');
         charElement.className = 'falling-char';
         charElement.textContent = char;
-        charElement.style.left = (x - 70) + 'px'; // 文字が大きくなったので調整
+        charElement.style.left = (x - 70) + 'px'; // 文字の中心を合わせるための調整
         charElement.style.top = '0px';
         charElement.style.color = color;
         charElement.dataset.char = char;
@@ -214,10 +215,10 @@ class FallingGame {
                 isCorrectKey = true;
             }
         } else {
-            // 赤文字：位置で判断（左列=25%、右列=80%）
+            // 赤文字：位置で判断（左列=25%、右列=75%）
             const gameAreaWidth = this.gameArea.offsetWidth;
             const leftColumn = gameAreaWidth * 0.25;
-            const rightColumn = gameAreaWidth * 0.80;
+            const rightColumn = gameAreaWidth * 0.75;
             
             if ((Math.abs(bottomMostChar.x - leftColumn) < 50 && direction === 'left') || 
                 (Math.abs(bottomMostChar.x - rightColumn) < 50 && direction === 'right')) {
