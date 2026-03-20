@@ -131,10 +131,11 @@ class FallingGame {
         const charElement = document.createElement('div');
         charElement.className = 'falling-char';
         charElement.textContent = char;
-        charElement.style.left = (x - 70) + 'px'; // 文字の中心を合わせるための調整
+        charElement.style.left = x + 'px'; // 列の中心位置
         charElement.style.top = '0px';
         charElement.style.color = color;
         charElement.dataset.char = char;
+        charElement.style.transform = 'translateX(-50%)'; // 文字自体を中央揃え
 
         this.gameArea.appendChild(charElement);
         this.fallingChars.push({
@@ -238,7 +239,7 @@ class FallingGame {
             // 押されたキーの方向にはけるアニメーション
             const moveDirection = direction === 'left' ? -200 : 200;
             charElement.style.transition = 'transform 0.3s ease-out, opacity 0.3s ease-out';
-            charElement.style.transform = `translateX(${moveDirection}px)`;
+            charElement.style.transform = `translateX(calc(-50% + ${moveDirection}px))`;
             charElement.style.opacity = '0';
             
             this.score++;
