@@ -2,6 +2,7 @@ class FallingGame {
     constructor() {
         this.gameArea = document.getElementById('game-area');
         this.scoreElement = document.getElementById('score-value');
+        this.highscoreElement = document.getElementById('highscore-value');
         this.startBtn = document.getElementById('start-btn');
         
         this.score = 0;
@@ -14,9 +15,79 @@ class FallingGame {
         this.lastSpawnTime = 0;
         this.isHardMode = false; // ハードモードフラグ
         this.currentTab = 'normal'; // ハイスコア画面のタブ
+        this.audioContext = null; // Web Audio API用
         
         this.init();
         this.initScreenNavigation();
+    }
+    
+    // Web Audio APIの初期化
+    initAudio() {
+        if (!this.audioContext) {
+            this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        }
+    }
+    
+    // 正解音（ピコーン）
+    playCorrectSound() {
+        this.initAudio();
+        const oscillator = this.audioContext.createOscillator();
+        const gainNode = this.audioContext.createGain();
+        
+        oscillator.connect(gainNode);
+        gainNode.connect(this.audioContext.destination);
+        
+        oscillator.frequency.value = 800;
+        oscillator.type = 'sine';
+        
+        gainNode.gain.setValueAtTime(0.3, this.audioContext.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, this.audioContext.currentTime + 0.1);
+        
+        oscillator.start(this.audioContext.currentTime);
+        oscillator.stop(this.audioContext.currentTime + 0.1);
+    }
+    
+    // ミス音（ブー）
+    playErrorSound() {
+        this.initAudio();
+        const oscillator = this.audioContext.createOscillator();
+        const gainNode = this.audioContext.createGain();
+        
+        oscillator.connect(gainNode);
+        gainNode.connect(this.audioContext.destination);
+        
+        oscillator.frequency.value = 200;
+        oscillator.type = 'sawtooth';
+        
+        gainNode.gain.setValueAtTime(0.3, this.audioContext.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, this.audioContext.currentTime + 0.3);
+        
+        oscillator.start(this.audioContext.currentTime);
+        oscillator.stop(this.audioContext.currentTime + 0.3);
+    }
+    
+    // レベルアップ音（ピロリロリーン）
+    playLevelUpSound() {
+        this.initAudio();
+        const frequencies = [523, 659, 784, 1047]; // C, E, G, C (高)
+        
+        frequencies.forEach((freq, index) => {
+            const oscillator = this.audioContext.createOscillator();
+            const gainNode = this.audioContext.createGain();
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(this.audioContext.destination);
+            
+            oscillator.frequency.value = freq;
+            oscillator.type = 'sine';
+            
+            const startTime = this.audioContext.currentTime + (index * 0.1);
+            gainNode.gain.setValueAtTime(0.2, startTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, startTime + 0.15);
+            
+            oscillator.start(startTime);
+            oscillator.stop(startTime + 0.15);
+        });
     }
     
     init() {
@@ -66,6 +137,7 @@ class FallingGame {
         this.lastSpawnColumn = null;
         this.lastSpawnTime = 0;
         this.updateScore();
+        this.updateHighScore();
         this.startBtn.textContent = 'ゲーム中...';
         this.startBtn.disabled = true;
         
@@ -286,6 +358,9 @@ class FallingGame {
             const charElement = bottomMostChar.element;
             charElement.style.color = '#2ed573';
             
+            // 正解音を再生
+            this.playCorrectSound();
+            
             // 正解時の光るエフェクトを追加
             this.showFlashEffect(direction);
             
@@ -295,8 +370,15 @@ class FallingGame {
             charElement.style.transform = `translateX(calc(-50% + ${moveDirection}px))`;
             charElement.style.opacity = '0';
             
+            const previousScore = this.score;
             this.score++;
             this.updateScore();
+            
+            // レベルアップ時の音
+            if (Math.floor(this.score / 20) > Math.floor(previousScore / 20)) {
+                this.playLevelUpSound();
+            }
+            
             this.updateSpawnRate(); // スコア更新時にスピードチェック
         } else {
             // 間違いの場合：ゲームオーバー
@@ -485,8 +567,18 @@ class FallingGame {
         this.scoreElement.textContent = this.score;
     }
     
+    updateHighScore() {
+        const mode = this.isHardMode ? 'hard' : 'normal';
+        const scores = this.getHighScores(mode);
+        const topScore = scores.length > 0 ? scores[0].score : 0;
+        this.highscoreElement.textContent = topScore;
+    }
+    
     gameOver() {
         this.gameRunning = false;
+        
+        // ミス音を再生
+        this.playErrorSound();
         
         // インターバルをクリア
         if (this.spawnInterval) {
@@ -507,17 +599,18 @@ class FallingGame {
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            background: rgba(0,0,0,0.8);
+            background: rgba(0,0,0,0.9);
             color: white;
-            padding: 20px;
+            padding: 30px 40px;
             border-radius: 10px;
             text-align: center;
-            font-size: 24px;
             z-index: 10;
+            border: 2px solid #00ffff;
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.5);
         `;
         gameOverDiv.innerHTML = `
-            <div>ゲームオーバー!</div>
-            <div style="font-size: 18px; margin-top: 10px;">最終スコア: ${this.score}</div>
+            <div style="font-size: 28px; font-weight: 700; color: #00ffff; text-shadow: 0 0 10px #00ffff; margin-bottom: 15px; white-space: nowrap;">ゲームオーバー</div>
+            <div style="font-size: 20px; margin-top: 10px;">最終スコア: ${this.score}</div>
         `;
         
         this.gameArea.appendChild(gameOverDiv);
