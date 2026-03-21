@@ -131,12 +131,9 @@ html::before {
     position: absolute;
     font-size: clamp(80px, 12vw, 140px);
     font-weight: 900;
-    text-shadow: 
-        2px 2px 4px rgba(0, 0, 0, 0.8),
-        0 0 8px currentColor;
     user-select: none;
     z-index: 2;
-    font-family: 'Courier New', 'Monaco', monospace;
+    font-family: 'Hiragino Maru Gothic ProN', 'メイリオ', 'Meiryo', sans-serif;
 }
 
 #game-controls {
