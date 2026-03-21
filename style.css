@@ -675,13 +675,6 @@ input:checked + .toggle-slider:before {
     text-shadow: 0 0 8px rgba(255, 255, 255, 0.5);
 }
 
-.score-item .score-date {
-    font-size: 16px;
-    color: #aaaaaa;
-    min-width: 70px;
-    text-align: right;
-}
-
 /* トップ3のスタイル */
 .score-item:nth-child(1) {
     background: rgba(255, 215, 0, 0.25);
@@ -733,11 +726,6 @@ input:checked + .toggle-slider:before {
     
     .score-item .score-value {
         font-size: 18px;
-    }
-    
-    .score-item .score-date {
-        font-size: 14px;
-        min-width: 60px;
     }
 }
         min-width: 50px;

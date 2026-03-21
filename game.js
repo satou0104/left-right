@@ -171,7 +171,13 @@ class FallingGame {
         this.score = 0;
         this.fallingChars = [];
         this.gameArea.innerHTML = '';
-        this.gameSpeed = 3; // 初期速度を2から3に上げる
+        
+        // モードに応じて初期速度を設定
+        if (this.isSuperHardMode) {
+            this.gameSpeed = 7; // スーパーハードは速めにスタート
+        } else {
+            this.gameSpeed = 3; // ノーマル・ハードは3
+        }
         
         // モードに応じて初期生成間隔を設定
         if (this.isSuperHardMode) {
@@ -496,24 +502,28 @@ class FallingGame {
             this.isHardMode = false;
             this.isSuperHardMode = false;
             this.showScreen('game-screen');
+            this.updateHighScore();
         });
         startMenuBtn.addEventListener('touchend', (e) => {
             e.preventDefault();
             this.isHardMode = false;
             this.isSuperHardMode = false;
             this.showScreen('game-screen');
+            this.updateHighScore();
         });
         
         startHardBtn.addEventListener('click', () => {
             this.isHardMode = true;
             this.isSuperHardMode = false;
             this.showScreen('game-screen');
+            this.updateHighScore();
         });
         startHardBtn.addEventListener('touchend', (e) => {
             e.preventDefault();
             this.isHardMode = true;
             this.isSuperHardMode = false;
             this.showScreen('game-screen');
+            this.updateHighScore();
         });
         
         const startSuperHardBtn = document.getElementById('start-super-hard-btn');
@@ -521,12 +531,14 @@ class FallingGame {
             this.isHardMode = false;
             this.isSuperHardMode = true;
             this.showScreen('game-screen');
+            this.updateHighScore();
         });
         startSuperHardBtn.addEventListener('touchend', (e) => {
             e.preventDefault();
             this.isHardMode = false;
             this.isSuperHardMode = true;
             this.showScreen('game-screen');
+            this.updateHighScore();
         });
         
         highscoreBtn.addEventListener('click', () => {
@@ -771,13 +783,10 @@ class FallingGame {
         
         let html = '<ol class="score-list">';
         scores.forEach((item, index) => {
-            const date = new Date(item.date);
-            const dateStr = `${date.getMonth() + 1}/${date.getDate()}`;
             html += `
                 <li class="score-item">
                     <span class="rank">${index + 1}</span>
                     <span class="score-value">${item.score}点</span>
-                    <span class="score-date">${dateStr}</span>
                 </li>
             `;
         });
