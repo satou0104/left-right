@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>左右落下ゲーム</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- メイン画面 -->
+    <div id="main-menu" class="screen">
+        <div id="main-container">
+            <h1 id="game-title">左右落下</h1>
+            <div id="menu-buttons">
+                <button id="start-menu-btn" class="menu-btn">スタート</button>
+                <button id="start-hard-btn" class="menu-btn hard-btn">ハードモード</button>
+                <button id="start-super-hard-btn" class="menu-btn super-hard-btn hidden">スーパーハード</button>
+                <button id="highscore-btn" class="menu-btn">ハイスコア</button>
+                <button id="instructions-btn" class="menu-btn">操作説明</button>
+                <button id="settings-btn" class="menu-btn">設定</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ゲーム画面 -->
+    <div id="game-screen" class="screen hidden">
+        <div id="game-container">
+            <div id="score-container">
+                <div id="score">スコア: <span id="score-value">0</span></div>
+                <div id="highscore">ハイスコア: <span id="highscore-value">0</span></div>
+            </div>
+            <div id="game-area"></div>
+            <div id="game-controls">
+                <button id="start-btn">ゲーム開始</button>
+                <button id="back-to-menu-btn" class="back-btn">メニューに戻る</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 操作説明画面 -->
+    <div id="instructions-screen" class="screen hidden">
+        <div id="instructions-container">
+            <h2>操作説明</h2>
+            <div class="instruction-content">
+                <h3>基本操作</h3>
+                <p>画面を左右にタッチして文字を消します</p>
+                
+                <h3>文字の種類</h3>
+                <div class="rule-item">
+                    <strong>黒文字：</strong>文字の意味で判断<br>
+                    「左」→ 左タッチ、「右」→ 右タッチ
+                </div>
+                <div class="rule-item">
+                    <strong style="color: #ff4757;">赤文字：</strong>文字の位置で判断<br>
+                    左側 → 左タッチ、右側 → 右タッチ
+                </div>
+                
+                <h3>ゲームルール</h3>
+                <p>・文字が画面下に到達する前に正しく操作する</p>
+                <p>・間違った操作をするとゲームオーバー</p>
+                <p>・20点ごとにスピードアップ</p>
+            </div>
+            <button id="back-from-instructions-btn" class="back-btn">戻る</button>
+        </div>
+    </div>
+
+    <!-- 設定画面 -->
+    <div id="settings-screen" class="screen hidden">
+        <div id="settings-container">
+            <h2>設定</h2>
+            <div class="settings-content">
+                <div class="setting-item">
+                    <span class="setting-label">効果音</span>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="sound-toggle" checked>
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+            </div>
+            <button id="back-from-settings-btn" class="back-btn">戻る</button>
+        </div>
+    </div>
+
+    <!-- ハイスコア画面 -->
+    <div id="highscore-screen" class="screen hidden">
+        <div id="highscore-container">
+            <h2>ハイスコア</h2>
+            <div class="mode-tabs">
+                <button id="normal-tab" class="tab-btn active">ノーマル</button>
+                <button id="hard-tab" class="tab-btn">ハード</button>
+                <button id="superhard-tab" class="tab-btn super-hard-tab hidden">スーパーハード</button>
+            </div>
+            <div id="highscore-list" class="highscore-content">
+                <!-- ハイスコアリストがここに表示される -->
+            </div>
+            <button id="back-from-highscore-btn" class="back-btn">戻る</button>
+        </div>
+    </div>
+
+    <script src="game.js"></script>
+</body>
+</html>

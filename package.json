@@ -1,0 +1,21 @@
+{
+  "name": "sayuurakka",
+  "version": "1.0.0",
+  "description": "左右落下ゲーム",
+  "main": "index.html",
+  "scripts": {
+    "build": "echo 'No build needed'"
+  },
+  "keywords": [
+    "game",
+    "mobile",
+    "ios"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "@capacitor/cli": "^8.2.0",
+    "@capacitor/core": "^8.2.0",
+    "@capacitor/ios": "^8.2.0"
+  }
+}

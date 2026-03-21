@@ -1,0 +1,756 @@
+html {
+    background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 30%, #16213e 70%, #0f3460 100%);
+    min-height: 100vh;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Courier New', 'Monaco', 'Menlo', monospace;
+    background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 30%, #16213e 70%, #0f3460 100%);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+    position: relative;
+}
+
+/* サイバーグリッド背景 */
+html::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: 
+        linear-gradient(rgba(0, 255, 255, 0.1) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0, 255, 255, 0.1) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: -1;
+}
+
+#game-container {
+    background: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(10px);
+    border-radius: 8px;
+    padding: 24px;
+    box-shadow: 0 0 30px rgba(0, 255, 255, 0.3);
+    text-align: center;
+    width: 90%;
+    max-width: 450px;
+    margin: 10px;
+    border: none;
+    position: relative;
+}
+
+#score-container {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    margin-bottom: 20px;
+    gap: 0;
+    position: relative;
+    width: 100%;
+    max-width: 400px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+#score, #highscore {
+    font-size: 24px;
+    font-weight: 700;
+    color: #00ffff;
+    text-shadow: 0 0 10px #00ffff;
+    font-family: 'Courier New', monospace;
+    letter-spacing: 2px;
+    width: 50%;
+    text-align: center;
+}
+
+#game-area {
+    width: 100%;
+    max-width: 400px;
+    height: 70vh;
+    min-height: 600px;
+    max-height: 700px;
+    border: none;
+    position: relative;
+    background: linear-gradient(180deg, #f0f8ff 0%, #e6f3ff 50%, #d9ecff 100%);
+    overflow: hidden;
+    margin: 0 auto;
+    touch-action: pan-y;
+    border-radius: 4px;
+    box-shadow: 
+        inset 0 0 20px rgba(0, 255, 255, 0.2),
+        0 0 20px rgba(0, 0, 0, 0.8);
+}
+
+#game-area::before {
+    content: '';
+    position: absolute;
+    left: 50%;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: #333333;
+    transform: translateX(-50%);
+    z-index: 1;
+    box-shadow: 0 0 4px rgba(51, 51, 51, 0.5);
+}
+
+/* 点線バージョンも追加（コメントアウト状態） */
+/*
+#game-area::after {
+    content: '';
+    position: absolute;
+    left: 50%;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background-image: repeating-linear-gradient(
+        to bottom,
+        #999 0px,
+        #999 10px,
+        transparent 10px,
+        transparent 20px
+    );
+    transform: translateX(-50%);
+    z-index: 1;
+}
+*/
+
+.falling-char {
+    position: absolute;
+    font-size: clamp(80px, 12vw, 140px);
+    font-weight: 900;
+    user-select: none;
+    z-index: 2;
+    font-family: 'Hiragino Maru Gothic ProN', 'メイリオ', 'Meiryo', sans-serif;
+}
+
+#game-controls {
+    margin-top: 20px;
+    display: flex;
+    flex-direction: row;
+    gap: 15px;
+    align-items: center;
+    justify-content: center;
+    min-height: 50px;
+}
+
+#start-btn {
+    background: linear-gradient(145deg, #001122 0%, #003366 50%, #001122 100%);
+    color: #00ffff;
+    border: 2px solid #00ffff;
+    padding: 14px 24px;
+    font-size: 15px;
+    font-weight: 700;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-top: 16px;
+    transition: all 0.3s ease;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+    box-shadow: 
+        0 0 20px rgba(0, 255, 255, 0.3),
+        inset 0 1px 0 rgba(0, 255, 255, 0.2);
+    transform: translateY(0);
+    text-shadow: 0 0 10px #00ffff;
+    font-family: 'Courier New', monospace;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    white-space: nowrap;
+    min-width: 160px;
+}
+
+#start-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 
+        0 0 30px rgba(0, 255, 255, 0.5),
+        0 5px 15px rgba(0, 0, 0, 0.3);
+    background: linear-gradient(145deg, #002244 0%, #004488 50%, #002244 100%);
+}
+
+#start-btn:active {
+    transform: translateY(1px);
+    box-shadow: 
+        0 0 15px rgba(0, 255, 255, 0.4),
+        inset 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+#start-btn:disabled {
+    opacity: 0.6;
+    transform: translateY(0);
+    box-shadow: 0 0 10px rgba(0, 255, 255, 0.2);
+}
+
+/* レスポンシブ対応 */
+@media screen and (max-width: 480px) {
+    body {
+        padding: 10px;
+    }
+    
+    #game-container {
+        padding: 20px;
+        width: 95%;
+        margin: 5px;
+        border-radius: 20px;
+    }
+    
+    #score-container {
+        flex-direction: row;
+        gap: 0;
+        margin-bottom: 15px;
+        max-width: 100%;
+    }
+    
+    #score, #highscore {
+        font-size: 18px;
+        width: 50%;
+    }
+    
+    #game-area {
+        height: 65vh;
+        min-height: 500px;
+        max-height: 600px;
+        border-radius: 14px;
+    }
+    
+    .falling-char {
+        font-size: clamp(85px, 14vw, 130px);
+    }
+    
+    #game-controls {
+        margin-top: 15px;
+        gap: 10px;
+    }
+    
+    #start-btn {
+        padding: 12px 20px;
+        font-size: 14px;
+    }
+    
+    .back-btn {
+        padding: 12px 20px;
+        font-size: 14px;
+    }
+    
+    #start-btn {
+        padding: 14px 28px;
+        font-size: 14px;
+        border-radius: 40px;
+    }
+}
+
+/* 小さい画面（iPhone SE等）対応 */
+@media screen and (max-width: 375px) {
+    #game-container {
+        padding: 15px;
+    }
+    
+    #game-area {
+        height: 60vh;
+        min-height: 450px;
+        max-height: 550px;
+        border-radius: 12px;
+    }
+    
+    .falling-char {
+        font-size: clamp(80px, 16vw, 120px);
+    }
+    
+    #game-controls {
+        margin-top: 12px;
+        gap: 8px;
+    }
+    
+    #start-btn {
+        padding: 10px 16px;
+        font-size: 13px;
+    }
+    
+    .back-btn {
+        padding: 10px 16px;
+        font-size: 13px;
+    }
+}
+/* 正解時の光るエフェクト */
+.flash-left, .flash-right {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 50%;
+    background: rgba(255, 255, 0, 0.3);
+    pointer-events: none;
+    z-index: 3;
+    opacity: 0;
+    animation: flashEffect 0.3s ease-out;
+}
+
+.flash-left {
+    left: 0;
+}
+
+.flash-right {
+    right: 0;
+}
+
+@keyframes flashEffect {
+    0% { opacity: 0; }
+    50% { opacity: 1; }
+    100% { opacity: 0; }
+}
+/* 画面管理 */
+.screen {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    width: 100%;
+}
+
+.hidden {
+    display: none !important;
+}
+
+/* メイン画面 */
+#main-container {
+    background: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(10px);
+    border-radius: 8px;
+    padding: 40px;
+    box-shadow: 0 0 30px rgba(0, 255, 255, 0.3);
+    text-align: center;
+    width: 90%;
+    max-width: 400px;
+    border: 2px solid #00ffff;
+}
+
+#game-title {
+    color: #00ffff;
+    font-size: 28px;
+    font-weight: 700;
+    margin-bottom: 40px;
+    text-shadow: 0 0 10px #00ffff;
+    font-family: 'Courier New', monospace;
+    letter-spacing: 2px;
+}
+
+#menu-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.menu-btn {
+    background: linear-gradient(145deg, #001122 0%, #003366 50%, #001122 100%);
+    color: #00ffff;
+    border: 2px solid #00ffff;
+    padding: 16px 32px;
+    font-size: 18px;
+    font-weight: 700;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+    box-shadow: 0 0 15px rgba(0, 255, 255, 0.3);
+    text-shadow: 0 0 8px #00ffff;
+    font-family: 'Courier New', monospace;
+    letter-spacing: 1px;
+}
+
+.menu-btn.hard-btn {
+    background: linear-gradient(145deg, #220011 0%, #660033 50%, #220011 100%);
+    color: #ff4757;
+    border: 2px solid #ff4757;
+    box-shadow: 0 0 15px rgba(255, 71, 87, 0.3);
+    text-shadow: 0 0 8px #ff4757;
+}
+
+.menu-btn.super-hard-btn {
+    background: linear-gradient(145deg, #330011 0%, #880044 50%, #330011 100%);
+    color: #ff1744;
+    border: 2px solid #ff1744;
+    box-shadow: 0 0 15px rgba(255, 23, 68, 0.4);
+    text-shadow: 0 0 10px #ff1744;
+}
+
+.menu-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 0 25px rgba(0, 255, 255, 0.5);
+    background: linear-gradient(145deg, #002244 0%, #004488 50%, #002244 100%);
+}
+
+.menu-btn.hard-btn:hover {
+    box-shadow: 0 0 25px rgba(255, 71, 87, 0.5);
+    background: linear-gradient(145deg, #440022 0%, #880044 50%, #440022 100%);
+}
+
+.menu-btn.super-hard-btn:hover {
+    box-shadow: 0 0 25px rgba(255, 23, 68, 0.6);
+    background: linear-gradient(145deg, #550033 0%, #aa0055 50%, #550033 100%);
+}
+
+.menu-btn:active {
+    transform: translateY(1px);
+    box-shadow: 0 0 10px rgba(0, 255, 255, 0.4);
+}
+
+/* 操作説明画面 */
+#instructions-container, #settings-container {
+    background: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(10px);
+    border-radius: 8px;
+    padding: 30px;
+    box-shadow: 0 0 30px rgba(0, 255, 255, 0.3);
+    width: 90%;
+    max-width: 500px;
+    border: 2px solid #00ffff;
+    color: #ffffff;
+    font-family: 'Courier New', monospace;
+}
+
+#instructions-container h2, #settings-container h2 {
+    color: #00ffff;
+    font-size: 24px;
+    margin-bottom: 20px;
+    text-align: center;
+    text-shadow: 0 0 8px #00ffff;
+}
+
+.instruction-content h3 {
+    color: #00ffff;
+    font-size: 18px;
+    margin: 20px 0 10px 0;
+    text-shadow: 0 0 5px #00ffff;
+}
+
+.instruction-content p {
+    margin: 10px 0;
+    line-height: 1.6;
+}
+
+.rule-item {
+    background: rgba(0, 255, 255, 0.1);
+    padding: 12px;
+    margin: 10px 0;
+    border-radius: 4px;
+    border-left: 4px solid #00ffff;
+}
+
+.settings-content {
+    text-align: center;
+    padding: 20px 0;
+    color: #cccccc;
+}
+
+.setting-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px;
+    background: rgba(0, 255, 255, 0.1);
+    border-radius: 6px;
+    margin-bottom: 15px;
+    border-left: 4px solid #00ffff;
+}
+
+.setting-label {
+    font-size: 18px;
+    color: #ffffff;
+    font-weight: 700;
+}
+
+/* トグルスイッチ */
+.toggle-switch {
+    position: relative;
+    display: inline-block;
+    width: 60px;
+    height: 34px;
+}
+
+.toggle-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.toggle-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #555;
+    transition: 0.4s;
+    border-radius: 34px;
+}
+
+.toggle-slider:before {
+    position: absolute;
+    content: "";
+    height: 26px;
+    width: 26px;
+    left: 4px;
+    bottom: 4px;
+    background-color: white;
+    transition: 0.4s;
+    border-radius: 50%;
+}
+
+input:checked + .toggle-slider {
+    background-color: #00ffff;
+    box-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+}
+
+input:checked + .toggle-slider:before {
+    transform: translateX(26px);
+}
+
+.back-btn {
+    background: linear-gradient(145deg, #220011 0%, #440022 50%, #220011 100%);
+    color: #ff00ff;
+    border: 2px solid #ff00ff;
+    padding: 14px 24px;
+    font-size: 15px;
+    font-weight: 700;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-top: 20px;
+    transition: all 0.3s ease;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+    box-shadow: 0 0 10px rgba(255, 0, 255, 0.3);
+    text-shadow: 0 0 5px #ff00ff;
+    font-family: 'Courier New', monospace;
+    white-space: nowrap;
+    min-width: 160px;
+}
+
+.back-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 0 20px rgba(255, 0, 255, 0.5);
+}
+
+.back-btn:active {
+    transform: translateY(1px);
+    box-shadow: 0 0 5px rgba(255, 0, 255, 0.4);
+}
+
+/* レスポンシブ対応 */
+@media screen and (max-width: 480px) {
+    #main-container {
+        padding: 30px 20px;
+    }
+    
+    #game-title {
+        font-size: 24px;
+        margin-bottom: 30px;
+    }
+    
+    .menu-btn {
+        font-size: 16px;
+        padding: 14px 28px;
+    }
+    
+    #instructions-container, #settings-container {
+        padding: 20px;
+    }
+}
+
+/* ハイスコア画面 */
+.mode-tabs {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+    justify-content: flex-start;
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding: 5px 0;
+    -webkit-overflow-scrolling: touch;
+}
+
+.mode-tabs::-webkit-scrollbar {
+    height: 4px;
+}
+
+.mode-tabs::-webkit-scrollbar-thumb {
+    background: rgba(0, 255, 255, 0.3);
+    border-radius: 2px;
+}
+
+.tab-btn {
+    background: rgba(0, 0, 0, 0.5);
+    color: #00ffff;
+    border: 2px solid #00ffff;
+    padding: 10px 20px;
+    font-size: 14px;
+    font-weight: 700;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+    font-family: 'Courier New', monospace;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+.tab-btn.active {
+    background: linear-gradient(145deg, #001122 0%, #003366 50%, #001122 100%);
+    box-shadow: 0 0 15px rgba(0, 255, 255, 0.5);
+}
+
+.tab-btn:hover {
+    transform: translateY(-2px);
+}
+
+/* ハードタブのスタイル */
+#hard-tab {
+    color: #ff4757;
+    border: 2px solid #ff4757;
+}
+
+#hard-tab.active {
+    background: linear-gradient(145deg, #220011 0%, #660033 50%, #220011 100%);
+    box-shadow: 0 0 15px rgba(255, 71, 87, 0.5);
+}
+
+/* スーパーハードタブのスタイル */
+#superhard-tab {
+    color: #ff1744;
+    border: 2px solid #ff1744;
+}
+
+#superhard-tab.active {
+    background: linear-gradient(145deg, #330011 0%, #880044 50%, #330011 100%);
+    box-shadow: 0 0 15px rgba(255, 23, 68, 0.5);
+}
+
+.highscore-content {
+    min-height: 300px;
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.no-scores {
+    text-align: center;
+    color: #00ffff;
+    padding: 40px 20px;
+    font-size: 18px;
+    text-shadow: 0 0 8px #00ffff;
+}
+
+.score-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.score-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 20px;
+    margin-bottom: 10px;
+    background: rgba(0, 255, 255, 0.15);
+    border-radius: 6px;
+    border-left: 4px solid #00ffff;
+    box-shadow: 0 0 10px rgba(0, 255, 255, 0.2);
+}
+
+.score-item .rank {
+    font-size: 24px;
+    font-weight: 700;
+    color: #00ffff;
+    min-width: 50px;
+    text-shadow: 0 0 10px #00ffff;
+}
+
+.score-item .score-value {
+    flex: 1;
+    font-size: 22px;
+    font-weight: 700;
+    color: #ffffff;
+    text-align: center;
+    text-shadow: 0 0 8px rgba(255, 255, 255, 0.5);
+}
+
+/* トップ3のスタイル */
+.score-item:nth-child(1) {
+    background: rgba(255, 215, 0, 0.25);
+    border-left-color: #ffd700;
+    box-shadow: 0 0 15px rgba(255, 215, 0, 0.3);
+}
+
+.score-item:nth-child(1) .rank {
+    color: #ffd700;
+    text-shadow: 0 0 15px #ffd700;
+}
+
+.score-item:nth-child(2) {
+    background: rgba(192, 192, 192, 0.25);
+    border-left-color: #c0c0c0;
+    box-shadow: 0 0 15px rgba(192, 192, 192, 0.3);
+}
+
+.score-item:nth-child(2) .rank {
+    color: #c0c0c0;
+    text-shadow: 0 0 15px #c0c0c0;
+}
+
+.score-item:nth-child(3) {
+    background: rgba(205, 127, 50, 0.25);
+    border-left-color: #cd7f32;
+    box-shadow: 0 0 15px rgba(205, 127, 50, 0.3);
+}
+
+.score-item:nth-child(3) .rank {
+    color: #cd7f32;
+    text-shadow: 0 0 15px #cd7f32;
+}
+
+/* レスポンシブ対応 */
+@media screen and (max-width: 480px) {
+    #highscore-container {
+        padding: 20px;
+    }
+    
+    .score-item {
+        padding: 12px 16px;
+    }
+    
+    .score-item .rank {
+        font-size: 20px;
+        min-width: 40px;
+    }
+    
+    .score-item .score-value {
+        font-size: 18px;
+    }
+}
+        min-width: 50px;
+    }
+}
