@@ -29,10 +29,14 @@ class FallingGame {
         const hasUnlocked = hardScores.some(score => score.score >= 140);
         
         const superHardBtn = document.getElementById('start-super-hard-btn');
+        const superHardTab = document.getElementById('superhard-tab');
+        
         if (hasUnlocked) {
             superHardBtn.classList.remove('hidden');
+            superHardTab.classList.remove('hidden');
         } else {
             superHardBtn.classList.add('hidden');
+            superHardTab.classList.add('hidden');
         }
     }
     
@@ -582,6 +586,7 @@ class FallingGame {
             this.currentTab = 'normal';
             normalTab.classList.add('active');
             hardTab.classList.remove('active');
+            document.getElementById('superhard-tab').classList.remove('active');
             this.displayHighScores();
         });
         normalTab.addEventListener('touchend', (e) => {
@@ -589,6 +594,7 @@ class FallingGame {
             this.currentTab = 'normal';
             normalTab.classList.add('active');
             hardTab.classList.remove('active');
+            document.getElementById('superhard-tab').classList.remove('active');
             this.displayHighScores();
         });
         
@@ -596,6 +602,7 @@ class FallingGame {
             this.currentTab = 'hard';
             hardTab.classList.add('active');
             normalTab.classList.remove('active');
+            document.getElementById('superhard-tab').classList.remove('active');
             this.displayHighScores();
         });
         hardTab.addEventListener('touchend', (e) => {
@@ -603,6 +610,24 @@ class FallingGame {
             this.currentTab = 'hard';
             hardTab.classList.add('active');
             normalTab.classList.remove('active');
+            document.getElementById('superhard-tab').classList.remove('active');
+            this.displayHighScores();
+        });
+        
+        const superHardTab = document.getElementById('superhard-tab');
+        superHardTab.addEventListener('click', () => {
+            this.currentTab = 'superhard';
+            superHardTab.classList.add('active');
+            normalTab.classList.remove('active');
+            hardTab.classList.remove('active');
+            this.displayHighScores();
+        });
+        superHardTab.addEventListener('touchend', (e) => {
+            e.preventDefault();
+            this.currentTab = 'superhard';
+            superHardTab.classList.add('active');
+            normalTab.classList.remove('active');
+            hardTab.classList.remove('active');
             this.displayHighScores();
         });
         

@@ -626,6 +626,17 @@ input:checked + .toggle-slider:before {
     box-shadow: 0 0 15px rgba(255, 71, 87, 0.5);
 }
 
+/* スーパーハードタブのスタイル */
+#superhard-tab {
+    color: #ff1744;
+    border: 2px solid #ff1744;
+}
+
+#superhard-tab.active {
+    background: linear-gradient(145deg, #330011 0%, #880044 50%, #330011 100%);
+    box-shadow: 0 0 15px rgba(255, 23, 68, 0.5);
+}
+
 .highscore-content {
     min-height: 300px;
     max-height: 400px;
