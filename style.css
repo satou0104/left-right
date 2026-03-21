@@ -585,7 +585,20 @@ input:checked + .toggle-slider:before {
     display: flex;
     gap: 10px;
     margin-bottom: 20px;
-    justify-content: center;
+    justify-content: flex-start;
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding: 5px 0;
+    -webkit-overflow-scrolling: touch;
+}
+
+.mode-tabs::-webkit-scrollbar {
+    height: 4px;
+}
+
+.mode-tabs::-webkit-scrollbar-thumb {
+    background: rgba(0, 255, 255, 0.3);
+    border-radius: 2px;
 }
 
 .tab-btn {
@@ -593,7 +606,7 @@ input:checked + .toggle-slider:before {
     color: #00ffff;
     border: 2px solid #00ffff;
     padding: 10px 20px;
-    font-size: 16px;
+    font-size: 14px;
     font-weight: 700;
     border-radius: 4px;
     cursor: pointer;
@@ -604,6 +617,8 @@ input:checked + .toggle-slider:before {
     -webkit-tap-highlight-color: transparent;
     touch-action: manipulation;
     font-family: 'Courier New', monospace;
+    white-space: nowrap;
+    flex-shrink: 0;
 }
 
 .tab-btn.active {
