@@ -18,6 +18,7 @@ workflows:
           npm install
       - name: Capacitor sync
         script: |
+          npm install -g @capacitor/cli
           npx cap sync ios
       - name: Set up code signing settings on Xcode project
         script: |
