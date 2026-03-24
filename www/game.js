@@ -10,12 +10,12 @@ class FallingGame {
         this.fallingChars = [];
         this.gameSpeed = 2;
         this.spawnInterval = null; // setIntervalのID
-        this.spawnDelay = 1000; // 初期生�E間隔�E�E秒！E
+        this.spawnDelay = 1000; // 初期生成間隔（1秒）
         this.lastSpawnColumn = null;
         this.lastSpawnTime = 0;
-        this.isHardMode = false; // ハ�Eドモードフラグ
-        this.isSuperHardMode = false; // スーパ�Eハ�Eドモードフラグ
-        this.currentTab = 'normal'; // ハイスコア画面のタチE
+        this.isHardMode = false; // ハードモードフラグ
+        this.isSuperHardMode = false; // スーパーハードモードフラグ
+        this.currentTab = 'normal'; // ハイスコア画面のタブ
         this.audioContext = null; // Web Audio API用
         
         this.init();
@@ -23,7 +23,7 @@ class FallingGame {
         this.checkSuperHardUnlock();
     }
     
-    // スーパ�Eハ�Eド�EアンロチE��状態をチェチE��
+    // スーパーハードのアンロック状態をチェック
     checkSuperHardUnlock() {
         const hardScores = this.getHighScores('hard');
         const hasUnlocked = hardScores.some(score => score.score >= 140);
@@ -40,14 +40,14 @@ class FallingGame {
         }
     }
     
-    // Web Audio APIの初期匁E
+    // Web Audio APIの初期化
     initAudio() {
         if (!this.audioContext) {
             this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
         }
     }
     
-    // 正解音�E�左右で音を変える！E
+    // 正解音（左右で音を変える）
     playCorrectSound(direction) {
         if (!this.getSoundEnabled()) return;
         
@@ -72,7 +72,7 @@ class FallingGame {
         oscillator.stop(this.audioContext.currentTime + 0.12);
     }
     
-    // ミス音�E�軽ぁE�EチE��E
+    // ミス音（軽いポッ）
     playErrorSound() {
         if (!this.getSoundEnabled()) return;
         
@@ -93,12 +93,12 @@ class FallingGame {
         oscillator.stop(this.audioContext.currentTime + 0.1);
     }
     
-    // レベルアチE�E音�E�ピロリロリーン�E�E
+    // レベルアップ音（ピロリロリーン）
     playLevelUpSound() {
         if (!this.getSoundEnabled()) return;
         
         this.initAudio();
-        const frequencies = [523, 659, 784, 1047]; // C, E, G, C (髁E
+        const frequencies = [523, 659, 784, 1047]; // C, E, G, C (高)
         
         frequencies.forEach((freq, index) => {
             const oscillator = this.audioContext.createOscillator();
@@ -119,13 +119,13 @@ class FallingGame {
         });
     }
     
-    // 音のON/OFF設定を取征E
+    // 音のON/OFF設定を取得
     getSoundEnabled() {
         const enabled = localStorage.getItem('soundEnabled');
         return enabled === null ? true : enabled === 'true';
     }
     
-    // 音のON/OFF設定を保孁E
+    // 音のON/OFF設定を保存
     setSoundEnabled(enabled) {
         localStorage.setItem('soundEnabled', enabled);
     }
@@ -138,14 +138,14 @@ class FallingGame {
     
     init() {
         this.startBtn.addEventListener('click', () => this.startGame());
-        // iOSでのタチE��イベントも追加
+        // iOSでのタッチイベントも追加
         this.startBtn.addEventListener('touchend', (e) => {
             e.preventDefault();
             this.startGame();
         });
         document.addEventListener('keydown', (e) => this.handleKeyPress(e));
         
-        // タチE��イベント�E追加
+        // タッチイベントの追加
         this.setupTouchEvents();
     }
     
@@ -159,7 +159,7 @@ class FallingGame {
             const touchX = touch.clientX - rect.left;
             const gameAreaWidth = this.gameArea.offsetWidth;
             
-            // 左半�EをタチE��した場合�E左、右半�EをタチE��した場合�E右
+            // 左半分をタッチした場合は左、右半分をタッチした場合は右
             if (touchX < gameAreaWidth / 2) {
                 this.handleTouch('left');
             } else {
@@ -176,20 +176,20 @@ class FallingGame {
         this.fallingChars = [];
         this.gameArea.innerHTML = '';
         
-        // モードに応じて初期速度を設宁E
+        // モードに応じて初期速度を設定
         if (this.isSuperHardMode) {
-            this.gameSpeed = 7; // スーパ�Eハ�Eド�E速めにスターチE
+            this.gameSpeed = 7; // スーパーハードは速めにスタート
         } else {
-            this.gameSpeed = 3; // ノ�Eマル・ハ�Eド�E3
+            this.gameSpeed = 3; // ノーマル・ハードは3
         }
         
-        // モードに応じて初期生�E間隔を設宁E
+        // モードに応じて初期生成間隔を設定
         if (this.isSuperHardMode) {
-            this.spawnDelay = 300; // スーパ�Eハ�EチE 0.3秒かめE
+            this.spawnDelay = 300; // スーパーハード: 0.3秒から
         } else if (this.isHardMode) {
-            this.spawnDelay = 500; // ハ�EチE 0.5秒かめE
+            this.spawnDelay = 500; // ハード: 0.5秒から
         } else {
-            this.spawnDelay = 1000; // ノ�Eマル: 1秒かめE
+            this.spawnDelay = 1000; // ノーマル: 1秒から
         }
         
         this.lastSpawnColumn = null;
@@ -199,17 +199,17 @@ class FallingGame {
         this.startBtn.textContent = 'ゲーム中...';
         this.startBtn.disabled = true;
         
-        // ハ�Eドモード�E場合�E外枠の背景色を変更
+        // ハードモードの場合は外枠の背景色を変更
         const gameContainer = document.getElementById('game-container');
         if (this.isSuperHardMode) {
-            gameContainer.style.background = 'rgba(60, 0, 20, 0.8)'; // スーパ�Eハ�Eド�E濁E��赤
+            gameContainer.style.background = 'rgba(60, 0, 20, 0.8)'; // スーパーハードは濃い赤
         } else if (this.isHardMode) {
             gameContainer.style.background = 'rgba(40, 0, 0, 0.8)';
         } else {
             gameContainer.style.background = 'rgba(0, 0, 0, 0.8)';
         }
         
-        // 定期皁E��斁E��生成を開姁E
+        // 定期的な文字生成を開始
         this.startSpawning();
         this.gameLoop();
     }
@@ -217,27 +217,27 @@ class FallingGame {
     gameLoop() {
         if (!this.gameRunning) return;
         
-        // 斁E��を移勁E
+        // 文字を移動
         this.updateChars();
         
         requestAnimationFrame(() => this.gameLoop());
     }
     
     startSpawning() {
-        // 既存�Eインターバルをクリア
+        // 既存のインターバルをクリア
         if (this.spawnInterval) {
             clearInterval(this.spawnInterval);
         }
         
-        // 新しいインターバルを設宁E
+        // 新しいインターバルを設定
         this.spawnInterval = setInterval(() => {
             if (this.gameRunning) {
-                // Math.randomで左右を決宁E
+                // Math.randomで左右を決定
                 if (Math.random() < 0.5) {
-                    // 左列に落とぁE
+                    // 左列に落とす
                     this.spawnCharInColumn(0);
                 } else {
-                    // 右列に落とぁE
+                    // 右列に落とす
                     this.spawnCharInColumn(1);
                 }
             }
@@ -246,28 +246,28 @@ class FallingGame {
     
     updateSpawnRate() {
         if (this.isSuperHardMode) {
-            // スーパ�Eハ�EドモーチE レベル7スターチE
-            const level = Math.floor(this.score / 20) + 7; // レベル7から開姁E
+            // スーパーハードモード: レベル7スタート
+            const level = Math.floor(this.score / 20) + 7; // レベル7から開始
             let newDelay;
             
             if (this.score >= 180) {
-                newDelay = 50; // レベル15: 0.05私E
+                newDelay = 50; // レベル15: 0.05秒
             } else if (this.score >= 160) {
-                newDelay = 70; // レベル14: 0.07私E
+                newDelay = 70; // レベル14: 0.07秒
             } else if (this.score >= 140) {
-                newDelay = 90; // レベル13: 0.09私E
+                newDelay = 90; // レベル13: 0.09秒
             } else if (this.score >= 120) {
-                newDelay = 110; // レベル12: 0.11私E
+                newDelay = 110; // レベル12: 0.11秒
             } else if (this.score >= 100) {
-                newDelay = 130; // レベル11: 0.13私E
+                newDelay = 130; // レベル11: 0.13秒
             } else if (this.score >= 80) {
-                newDelay = 150; // レベル10: 0.15私E
+                newDelay = 150; // レベル10: 0.15秒
             } else if (this.score >= 60) {
-                newDelay = 200; // レベル9: 0.2私E
+                newDelay = 200; // レベル9: 0.2秒
             } else if (this.score >= 40) {
-                newDelay = 250; // レベル8: 0.25私E
+                newDelay = 250; // レベル8: 0.25秒
             } else {
-                newDelay = 300; // レベル7: 0.3私E
+                newDelay = 300; // レベル7: 0.3秒
             }
             
             if (newDelay !== this.spawnDelay) {
@@ -275,27 +275,27 @@ class FallingGame {
                 this.startSpawning();
             }
             
-            // 落下速度も上げめE
+            // 落下速度も上げる
             this.gameSpeed = Math.min(3 + (level * 0.7), 12);
         } else if (this.isHardMode) {
-            // ハ�EドモーチE より細かいレベル設宁E
+            // ハードモード: より細かいレベル設定
             const level = Math.floor(this.score / 20);
             let newDelay;
             
             if (this.score >= 200) {
-                newDelay = 150; // レベル10: 0.15私E
+                newDelay = 150; // レベル10: 0.15秒
             } else if (this.score >= 180) {
-                newDelay = 200; // レベル9: 0.2私E
+                newDelay = 200; // レベル9: 0.2秒
             } else if (this.score >= 160) {
-                newDelay = 250; // レベル8: 0.25私E
+                newDelay = 250; // レベル8: 0.25秒
             } else if (this.score >= 140) {
-                newDelay = 300; // レベル7: 0.3私E
+                newDelay = 300; // レベル7: 0.3秒
             } else if (this.score >= 120) {
-                newDelay = 400; // レベル6: 0.4私E
+                newDelay = 400; // レベル6: 0.4秒
             } else if (this.score >= 100) {
-                newDelay = 500; // レベル5: 0.5私E
+                newDelay = 500; // レベル5: 0.5秒
             } else {
-                newDelay = Math.max(500 - (level * 50), 500); // 0-99点は0.5秒固宁E
+                newDelay = Math.max(500 - (level * 50), 500); // 0-99点は0.5秒固定
             }
             
             if (newDelay !== this.spawnDelay) {
@@ -303,19 +303,19 @@ class FallingGame {
                 this.startSpawning();
             }
             
-            // 落下速度も上げる（�E朁E + レベルごとに0.6、最大10�E�E
+            // 落下速度も上げる（初期3 + レベルごとに0.6、最大10）
             this.gameSpeed = Math.min(3 + (level * 0.6), 10);
         } else {
-            // ノ�EマルモーチE 20点ごとにスピ�EドアチE�E
+            // ノーマルモード: 20点ごとにスピードアップ
             const level = Math.floor(this.score / 20);
-            const newDelay = Math.max(1000 - (level * 100), 300); // 最佁E.3秒まで
+            const newDelay = Math.max(1000 - (level * 100), 300); // 最低0.3秒まで
             
             if (newDelay !== this.spawnDelay) {
                 this.spawnDelay = newDelay;
-                this.startSpawning(); // インターバルを�E設宁E
+                this.startSpawning(); // インターバルを再設定
             }
             
-            // 落下速度も上げる（�E朁E + レベルごとに0.5、最大8�E�E
+            // 落下速度も上げる（初期3 + レベルごとに0.5、最大8）
             this.gameSpeed = Math.min(3 + (level * 0.5), 8);
         }
     }
@@ -326,21 +326,21 @@ class FallingGame {
         const char = chars[Math.floor(Math.random() * chars.length)];
         const color = colors[Math.floor(Math.random() * colors.length)];
 
-        // ゲームエリアの幁E��応じて列�E位置を計箁E
-        // 真ん中の線！E0%�E�を基準に、左列�E25%、右列�E75%
+        // ゲームエリアの幅に応じて列の位置を計算
+        // 真ん中の線（50%）を基準に、左列は25%、右列は75%
         const gameAreaWidth = this.gameArea.offsetWidth;
-        const leftColumn = gameAreaWidth * 0.25;  // 左列�E中忁E
-        const rightColumn = gameAreaWidth * 0.75; // 右列�E中忁E
+        const leftColumn = gameAreaWidth * 0.25;  // 左列の中心
+        const rightColumn = gameAreaWidth * 0.75; // 右列の中心
         const columns = [leftColumn, rightColumn];
 
         const x = columns[columnIndex];
         
-        // 同じ列�E上部�E�E00px以冁E��に斁E��があるかチェチE��
+        // 同じ列の上部（200px以内）に文字があるかチェック
         const hasCharInTop = this.fallingChars.some(charObj => {
             return Math.abs(charObj.x - x) < 50 && charObj.y < 200;
         });
         
-        // 上部に斁E��がある場合�E生�EしなぁE
+        // 上部に文字がある場合は生成しない
         if (hasCharInTop) {
             return;
         }
@@ -348,11 +348,11 @@ class FallingGame {
         const charElement = document.createElement('div');
         charElement.className = 'falling-char';
         charElement.textContent = char;
-        charElement.style.left = x + 'px'; // 列�E中忁E��置
+        charElement.style.left = x + 'px'; // 列の中心位置
         charElement.style.top = '0px';
         charElement.style.color = color;
         charElement.dataset.char = char;
-        charElement.style.transform = 'translateX(-50%)'; // 斁E���E体を中央揁E��
+        charElement.style.transform = 'translateX(-50%)'; // 文字自体を中央揃え
 
         this.gameArea.appendChild(charElement);
         this.fallingChars.push({
@@ -372,7 +372,7 @@ class FallingGame {
             charObj.y += this.gameSpeed;
             charObj.element.style.top = charObj.y + 'px';
             
-            // 画面下に到達した場吁E
+            // 画面下に到達した場合
             if (charObj.y > this.gameArea.offsetHeight) {
                 if (!charObj.matched) {
                     this.gameOver();
@@ -404,7 +404,7 @@ class FallingGame {
     }
     
     processInput(direction) {
-        // 画面冁E�E全ての斁E��から一番下�E斁E��を見つける
+        // 画面内の全ての文字から一番下の文字を見つける
         let bottomMostChar = null;
         let bottomMostY = -1;
         
@@ -412,17 +412,17 @@ class FallingGame {
             const charObj = this.fallingChars[i];
             if (charObj.matched || charObj.y >= this.gameArea.offsetHeight) continue;
             
-            // 画面冁E��一番下�E斁E��を探ぁE
+            // 画面内で一番下の文字を探す
             if (charObj.y > bottomMostY) {
                 bottomMostChar = charObj;
                 bottomMostY = charObj.y;
             }
         }
         
-        // 一番下�E斁E��が見つからなぁE��合�E何もしなぁE
+        // 一番下の文字が見つからない場合は何もしない
         if (!bottomMostChar) return;
         
-        // 一番下�E斁E��が押されたキーに対応するかチェチE��
+        // 一番下の文字が押されたキーに対応するかチェック
         let isCorrectKey = false;
         const isBlack = bottomMostChar.element.style.color === 'rgb(0, 0, 0)' || bottomMostChar.element.style.color === '#000000';
         
@@ -433,7 +433,7 @@ class FallingGame {
                 isCorrectKey = true;
             }
         } else {
-            // 赤斁E��：位置で判断�E�左刁E25%、右刁E75%�E�E
+            // 赤文字：位置で判断（左列=25%、右列=75%）
             const gameAreaWidth = this.gameArea.offsetWidth;
             const leftColumn = gameAreaWidth * 0.25;
             const rightColumn = gameAreaWidth * 0.75;
@@ -445,15 +445,15 @@ class FallingGame {
         }
         
         if (isCorrectKey) {
-            // 正解の場吁E
+            // 正解の場合
             bottomMostChar.matched = true;
             const charElement = bottomMostChar.element;
             charElement.style.color = '#2ed573';
             
-            // 正解音を�E甁E
+            // 正解音を再生
             this.playCorrectSound();
             
-            // 正解時�E光るエフェクトを追加
+            // 正解時の光るエフェクトを追加
             this.showFlashEffect(direction);
             
             // 押されたキーの方向にはけるアニメーション
@@ -466,26 +466,26 @@ class FallingGame {
             this.score++;
             this.updateScore();
             
-            // レベルアチE�E時�E音
+            // レベルアップ時の音
             if (Math.floor(this.score / 20) > Math.floor(previousScore / 20)) {
                 this.playLevelUpSound();
             }
             
-            this.updateSpawnRate(); // スコア更新時にスピ�EドチェチE��
+            this.updateSpawnRate(); // スコア更新時にスピードチェック
         } else {
-            // 間違ぁE�E場合：ゲームオーバ�E
+            // 間違いの場合：ゲームオーバー
             this.gameOver();
         }
     }
     
     showFlashEffect(direction) {
-        // 光るエフェクト要素を作�E
+        // 光るエフェクト要素を作成
         const flashElement = document.createElement('div');
         flashElement.className = direction === 'left' ? 'flash-left' : 'flash-right';
         
         this.gameArea.appendChild(flashElement);
         
-        // アニメーション終亁E��に要素を削除
+        // アニメーション終了後に要素を削除
         setTimeout(() => {
             if (this.gameArea.contains(flashElement)) {
                 this.gameArea.removeChild(flashElement);
@@ -494,22 +494,15 @@ class FallingGame {
     }
     
     initScreenNavigation() {
-        // メニューボタンのイベントリスナ�E
+        // メニューボタンのイベントリスナー
         const startMenuBtn = document.getElementById('start-menu-btn');
         const startHardBtn = document.getElementById('start-hard-btn');
         const highscoreBtn = document.getElementById('highscore-btn');
         const instructionsBtn = document.getElementById('instructions-btn');
         const settingsBtn = document.getElementById('settings-btn');
         
-        // クリチE��とタチE��イベント�E両方を追加
+        // クリックイベント（タッチデバイスでも動作）
         startMenuBtn.addEventListener('click', () => {
-            this.isHardMode = false;
-            this.isSuperHardMode = false;
-            this.showScreen('game-screen');
-            this.updateHighScore();
-        });
-        startMenuBtn.addEventListener('touchend', (e) => {
-            e.preventDefault();
             this.isHardMode = false;
             this.isSuperHardMode = false;
             this.showScreen('game-screen');
@@ -517,13 +510,6 @@ class FallingGame {
         });
         
         startHardBtn.addEventListener('click', () => {
-            this.isHardMode = true;
-            this.isSuperHardMode = false;
-            this.showScreen('game-screen');
-            this.updateHighScore();
-        });
-        startHardBtn.addEventListener('touchend', (e) => {
-            e.preventDefault();
             this.isHardMode = true;
             this.isSuperHardMode = false;
             this.showScreen('game-screen');
@@ -572,13 +558,13 @@ class FallingGame {
             this.loadSettings();
         });
         
-        // 設定�EトグルスイチE��
+        // 設定のトグルスイッチ
         const soundToggle = document.getElementById('sound-toggle');
         soundToggle.addEventListener('change', (e) => {
             this.setSoundEnabled(e.target.checked);
         });
         
-        // ハイスコアタブ�Eイベントリスナ�E
+        // ハイスコアタブのイベントリスナー
         const normalTab = document.getElementById('normal-tab');
         const hardTab = document.getElementById('hard-tab');
         
@@ -631,7 +617,7 @@ class FallingGame {
             this.displayHighScores();
         });
         
-        // 戻る�Eタンのイベントリスナ�E
+        // 戻るボタンのイベントリスナー
         const backToMenuBtn = document.getElementById('back-to-menu-btn');
         const backFromInstructionsBtn = document.getElementById('back-from-instructions-btn');
         const backFromSettingsBtn = document.getElementById('back-from-settings-btn');
@@ -677,12 +663,12 @@ class FallingGame {
         const screens = document.querySelectorAll('.screen');
         screens.forEach(screen => screen.classList.add('hidden'));
         
-        // 持E��された画面を表示
+        // 指定された画面を表示
         document.getElementById(screenId).classList.remove('hidden');
     }
     
     resetGame() {
-        // ゲームをリセチE��
+        // ゲームをリセット
         this.gameRunning = false;
         if (this.spawnInterval) {
             clearInterval(this.spawnInterval);
@@ -692,11 +678,11 @@ class FallingGame {
         this.fallingChars = [];
         this.gameArea.innerHTML = '';
         
-        // 背景色をノーマルに戻ぁE
+        // 背景色をノーマルに戻す
         this.gameArea.style.background = 'linear-gradient(180deg, #f0f8ff 0%, #e6f3ff 50%, #d9ecff 100%)';
         
         this.updateScore();
-        this.startBtn.textContent = 'ゲーム開姁E;
+        this.startBtn.textContent = 'ゲーム開始';
         this.startBtn.disabled = false;
     }
     
@@ -720,7 +706,7 @@ class FallingGame {
     gameOver() {
         this.gameRunning = false;
         
-        // ミス音を�E甁E
+        // ミス音を再生
         this.playErrorSound();
         
         // インターバルをクリア
@@ -729,13 +715,13 @@ class FallingGame {
             this.spawnInterval = null;
         }
         
-        // ハイスコアを保孁E
+        // ハイスコアを保存
         this.saveHighScore(this.score);
         
         this.startBtn.textContent = 'リトライ';
         this.startBtn.disabled = false;
         
-        // ゲームオーバ�E表示
+        // ゲームオーバー表示
         const gameOverDiv = document.createElement('div');
         gameOverDiv.style.cssText = `
             position: absolute;
@@ -752,13 +738,13 @@ class FallingGame {
             box-shadow: 0 0 20px rgba(0, 255, 255, 0.5);
         `;
         gameOverDiv.innerHTML = `
-            <div style="font-size: 28px; font-weight: 700; color: #00ffff; text-shadow: 0 0 10px #00ffff; margin-bottom: 15px; white-space: nowrap;">ゲームオーバ�E</div>
+            <div style="font-size: 28px; font-weight: 700; color: #00ffff; text-shadow: 0 0 10px #00ffff; margin-bottom: 15px; white-space: nowrap;">ゲームオーバー</div>
             <div style="font-size: 20px; margin-top: 10px;">最終スコア: ${this.score}</div>
         `;
         
         this.gameArea.appendChild(gameOverDiv);
         
-        // 3秒後にゲームオーバ�E表示を削除
+        // 3秒後にゲームオーバー表示を削除
         setTimeout(() => {
             if (this.gameArea.contains(gameOverDiv)) {
                 this.gameArea.removeChild(gameOverDiv);
@@ -770,7 +756,7 @@ class FallingGame {
         const mode = this.isSuperHardMode ? 'superhard' : (this.isHardMode ? 'hard' : 'normal');
         const key = `highscores_${mode}`;
         
-        // 既存�Eハイスコアを取征E
+        // 既存のハイスコアを取得
         let highscores = JSON.parse(localStorage.getItem(key) || '[]');
         
         // 新しいスコアを追加
@@ -779,16 +765,16 @@ class FallingGame {
             date: new Date().toISOString()
         });
         
-        // スコアでソート（降頁E��E
+        // スコアでソート（降順）
         highscores.sort((a, b) => b.score - a.score);
         
-        // トッチE0のみ保持
+        // トップ10のみ保持
         highscores = highscores.slice(0, 10);
         
-        // 保孁E
+        // 保存
         localStorage.setItem(key, JSON.stringify(highscores));
         
-        // スーパ�Eハ�Eド�EアンロチE��状態を更新
+        // スーパーハードのアンロック状態を更新
         this.checkSuperHardUnlock();
     }
     
@@ -821,7 +807,7 @@ class FallingGame {
     }
 }
 
-// ゲーム開姁E
+// ゲーム開始
 window.addEventListener('DOMContentLoaded', () => {
     new FallingGame();
 });

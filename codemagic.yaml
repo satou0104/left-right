@@ -18,6 +18,11 @@ workflows:
       - name: Install npm dependencies
         script: |
           npm install
+      - name: Copy web files to www
+        script: |
+          cp index.html www/
+          cp game.js www/
+          cp style.css www/
       - name: Capacitor sync
         script: |
           npm install -g @capacitor/cli
