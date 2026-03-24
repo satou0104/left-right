@@ -366,7 +366,6 @@ html::before {
     -webkit-appearance: none;
     -moz-appearance: none;
     appearance: none;
-    -webkit-tap-highlight-color: transparent;
     touch-action: manipulation;
     box-shadow: 0 0 15px rgba(0, 255, 255, 0.3);
     text-shadow: 0 0 8px #00ffff;
