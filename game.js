@@ -501,15 +501,8 @@ class FallingGame {
         const instructionsBtn = document.getElementById('instructions-btn');
         const settingsBtn = document.getElementById('settings-btn');
         
-        // クリックとタッチイベントの両方を追加
+        // クリックイベント（タッチデバイスでも動作）
         startMenuBtn.addEventListener('click', () => {
-            this.isHardMode = false;
-            this.isSuperHardMode = false;
-            this.showScreen('game-screen');
-            this.updateHighScore();
-        });
-        startMenuBtn.addEventListener('touchend', (e) => {
-            e.preventDefault();
             this.isHardMode = false;
             this.isSuperHardMode = false;
             this.showScreen('game-screen');
@@ -517,13 +510,6 @@ class FallingGame {
         });
         
         startHardBtn.addEventListener('click', () => {
-            this.isHardMode = true;
-            this.isSuperHardMode = false;
-            this.showScreen('game-screen');
-            this.updateHighScore();
-        });
-        startHardBtn.addEventListener('touchend', (e) => {
-            e.preventDefault();
             this.isHardMode = true;
             this.isSuperHardMode = false;
             this.showScreen('game-screen');
