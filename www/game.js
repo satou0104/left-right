@@ -299,6 +299,14 @@ class FallingGame {
     
     // リワード広告を表示（AdMobと連携）
     async showRewardedAd() {
+        // TODO: AdMobプラグインのインストール後に有効化
+        // 現在はテスト用に即座にクレジット回復
+        console.log('AdMob integration pending');
+        this.showToast('広告視聴完了！クレジットを回復しました', 'info');
+        this.restoreCredits();
+        return;
+        
+        /* AdMob統合コード（後で有効化）
         try {
             // Capacitorプラグインが利用可能かチェック
             if (typeof window.Capacitor === 'undefined' || !window.Capacitor.Plugins.AdMob) {
@@ -335,6 +343,7 @@ class FallingGame {
             console.error('AdMob error:', error);
             this.showToast('広告の読み込みに失敗しました', 'error');
         }
+        */
     }
     
     setupTouchEvents() {
