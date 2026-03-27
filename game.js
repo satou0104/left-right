@@ -570,11 +570,13 @@ class FallingGame {
         
         highscoreBtn.addEventListener('click', () => {
             this.showScreen('highscore-screen');
+            this.updateRankingTitle();
             this.displayHighScores();
         });
         highscoreBtn.addEventListener('touchend', (e) => {
             e.preventDefault();
             this.showScreen('highscore-screen');
+            this.updateRankingTitle();
             this.displayHighScores();
         });
         
@@ -876,14 +878,15 @@ class FallingGame {
         }
     }
     
-    // グローバルランキングを表示
+    // グローバルランキングを表示（今日の日付のみ）
     async displayGlobalRanking() {
         const highscoreList = document.getElementById('highscore-list');
         highscoreList.innerHTML = '<p class="loading-message">読み込み中...</p>';
         
         try {
             const mode = this.currentTab;
-            const dbRef = window.firebaseRef(window.firebaseDB, `rankings/${mode}`);
+            const today = this.getTodayDate();
+            const dbRef = window.firebaseRef(window.firebaseDB, `rankings/${mode}/${today}`);
             const rankingQuery = window.firebaseQuery(
                 dbRef,
                 window.firebaseOrderByChild('score'),
@@ -954,16 +957,39 @@ class FallingGame {
     }
     
     // スコアをFirebaseに送信
+    // 今日の日付を取得（YYYY-MM-DD形式）
+    getTodayDate() {
+        const now = new Date();
+        const year = now.getFullYear();
+        const month = String(now.getMonth() + 1).padStart(2, '0');
+        const day = String(now.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    }
+    
+    // 日付を表示用にフォーマット（YYYY/MM/DD形式）
+    formatDateForDisplay(dateStr) {
+        return dateStr.replace(/-/g, '/');
+    }
+    
+    // ランキングタイトルを更新
+    updateRankingTitle() {
+        const today = this.getTodayDate();
+        const displayDate = this.formatDateForDisplay(today);
+        document.getElementById('ranking-title').textContent = `ランキング（${displayDate}）`;
+    }
+    
     async submitScoreToFirebase(nickname, score) {
         try {
             const mode = this.isSuperHardMode ? 'superhard' : (this.isHardMode ? 'hard' : 'normal');
-            const dbRef = window.firebaseRef(window.firebaseDB, `rankings/${mode}`);
+            const today = this.getTodayDate();
+            const dbRef = window.firebaseRef(window.firebaseDB, `rankings/${mode}/${today}`);
             const newScoreRef = window.firebasePush(dbRef);
             
             await window.firebaseSet(newScoreRef, {
                 nickname: nickname,
                 score: score,
-                timestamp: Date.now()
+                timestamp: Date.now(),
+                date: today
             });
             
             return true;

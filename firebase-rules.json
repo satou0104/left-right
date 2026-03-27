@@ -1,0 +1,16 @@
+{
+  "rules": {
+    "rankings": {
+      "$mode": {
+        "$date": {
+          ".read": true,
+          ".write": true,
+          ".indexOn": ["score"],
+          "$scoreId": {
+            ".validate": "newData.hasChildren(['nickname', 'score', 'timestamp', 'date']) && newData.child('nickname').isString() && newData.child('score').isNumber() && newData.child('timestamp').isNumber() && newData.child('date').isString()"
+          }
+        }
+      }
+    }
+  }
+}

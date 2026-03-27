@@ -1016,6 +1016,24 @@ input:checked + .toggle-slider:before {
     border-color: #00ffff;
 }
 
+/* ランキングタイトル */
+#ranking-title {
+    color: #00ffff;
+    text-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+    margin-bottom: 20px;
+    font-size: 28px;
+}
+
+/* ランキング注釈 */
+.ranking-note {
+    font-size: 13px;
+    color: #00ffff;
+    text-align: center;
+    margin: 10px 0 5px 0;
+    opacity: 0.8;
+    font-weight: 500;
+}
+
 /* グローバルランキング用のスタイル */
 .score-item .nickname {
     color: #00ffff;

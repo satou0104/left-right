@@ -57,7 +57,7 @@
                 </div>
                 
                 <h3>ゲームルール</h3>
-                <p>・文字が画面下に到達する前に正しく操作する</p>
+                <p>・文字が画面下に到達前に正しく操作する</p>
                 <p>・間違った操作をするとゲームオーバー</p>
                 <p>・20点ごとにスピードアップ</p>
             </div>
@@ -92,7 +92,7 @@
     <!-- ハイスコア画面 -->
     <div id="highscore-screen" class="screen hidden">
         <div id="highscore-container">
-            <h2>ランキング</h2>
+            <h2 id="ranking-title">ランキング</h2>
             <div class="mode-tabs">
                 <button id="normal-tab" class="tab-btn active">ノーマル</button>
                 <button id="hard-tab" class="tab-btn">ハード</button>
@@ -102,6 +102,7 @@
                 <button id="local-ranking-tab" class="ranking-tab-btn active">ローカル</button>
                 <button id="global-ranking-tab" class="ranking-tab-btn">グローバル</button>
             </div>
+            <p class="ranking-note">※ランキングはデイリーのみになります。</p>
             <div id="highscore-list" class="highscore-content">
                 <!-- ハイスコアリストがここに表示される -->
             </div>
