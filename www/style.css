@@ -752,7 +752,7 @@ input:checked + .toggle-slider:before {
 
 /* ニックネーム入力オーバーレイ */
 #nickname-overlay {
-    position: absolute;
+    position: fixed;
     top: 0;
     left: 0;
     width: 100%;

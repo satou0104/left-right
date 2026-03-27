@@ -30,21 +30,6 @@
                 <div id="highscore">ハイスコア: <span id="highscore-value">0</span></div>
             </div>
             <div id="game-area">
-                <!-- ニックネーム入力オーバーレイ -->
-                <div id="nickname-overlay" class="hidden">
-                    <div id="nickname-popup">
-                        <h2>🎉 ハイスコア更新！</h2>
-                        <p class="final-score">スコア: <span id="final-score-value">0</span></p>
-                        <div class="nickname-input-group">
-                            <label for="nickname-input">ニックネーム</label>
-                            <input type="text" id="nickname-input" maxlength="10" placeholder="名前を入力">
-                        </div>
-                        <div class="nickname-buttons">
-                            <button id="submit-score-btn" class="popup-btn">登録する</button>
-                            <button id="skip-ranking-btn" class="popup-btn secondary">スキップ</button>
-                        </div>
-                    </div>
-                </div>
             </div>
             <div id="game-controls">
                 <button id="start-btn">ゲーム開始</button>
@@ -114,6 +99,22 @@
                 <!-- ハイスコアリストがここに表示される -->
             </div>
             <button id="back-from-highscore-btn" class="back-btn">戻る</button>
+        </div>
+    </div>
+
+    <!-- ニックネーム入力オーバーレイ（画面全体の中央に表示） -->
+    <div id="nickname-overlay" class="hidden">
+        <div id="nickname-popup">
+            <h2>🎉 ハイスコア更新！</h2>
+            <p class="final-score">スコア: <span id="final-score-value">0</span></p>
+            <div class="nickname-input-group">
+                <label for="nickname-input">ニックネーム</label>
+                <input type="text" id="nickname-input" maxlength="10" placeholder="名前を入力">
+            </div>
+            <div class="nickname-buttons">
+                <button id="submit-score-btn" class="popup-btn">登録する</button>
+                <button id="skip-ranking-btn" class="popup-btn secondary">スキップ</button>
+            </div>
         </div>
     </div>
 
