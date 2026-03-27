@@ -16,6 +16,7 @@ class FallingGame {
         this.isHardMode = false; // ハードモードフラグ
         this.isSuperHardMode = false; // スーパーハードモードフラグ
         this.currentTab = 'normal'; // ハイスコア画面のタブ
+        this.currentRankingTab = 'local'; // ランキングタブ（local/global）
         this.audioContext = null; // Web Audio API用
         
         this.init();
@@ -174,7 +175,13 @@ class FallingGame {
         this.gameRunning = true;
         this.score = 0;
         this.fallingChars = [];
+        
+        // game-areaをクリア（オーバーレイは保持）
+        const overlay = document.getElementById('nickname-overlay');
         this.gameArea.innerHTML = '';
+        if (overlay && overlay.parentElement !== this.gameArea) {
+            this.gameArea.appendChild(overlay);
+        }
         
         // モードに応じて初期速度を設定
         if (this.isSuperHardMode) {
@@ -656,6 +663,63 @@ class FallingGame {
             e.preventDefault();
             this.showScreen('main-menu');
         });
+        
+        // ランキングタブのイベントリスナー
+        const localRankingTab = document.getElementById('local-ranking-tab');
+        const globalRankingTab = document.getElementById('global-ranking-tab');
+        
+        localRankingTab.addEventListener('click', () => {
+            this.currentRankingTab = 'local';
+            localRankingTab.classList.add('active');
+            globalRankingTab.classList.remove('active');
+            this.displayHighScores();
+        });
+        
+        globalRankingTab.addEventListener('click', () => {
+            this.currentRankingTab = 'global';
+            globalRankingTab.classList.add('active');
+            localRankingTab.classList.remove('active');
+            this.displayHighScores();
+        });
+        
+        // ニックネーム入力画面のイベントリスナー
+        const submitScoreBtn = document.getElementById('submit-score-btn');
+        const skipRankingBtn = document.getElementById('skip-ranking-btn');
+        const nicknameInput = document.getElementById('nickname-input');
+        
+        submitScoreBtn.addEventListener('click', async () => {
+            const nickname = nicknameInput.value.trim();
+            if (!nickname) {
+                this.showToast('ニックネームを入力してください', 'error');
+                return;
+            }
+            
+            submitScoreBtn.disabled = true;
+            submitScoreBtn.textContent = '送信中...';
+            
+            const finalScore = parseInt(document.getElementById('final-score-value').textContent);
+            const success = await this.submitScoreToFirebase(nickname, finalScore);
+            
+            submitScoreBtn.disabled = false;
+            submitScoreBtn.textContent = '登録する';
+            
+            this.hideNicknameOverlay();
+            
+            if (!success) {
+                this.showToast('登録に失敗しました', 'error');
+            }
+        });
+        
+        skipRankingBtn.addEventListener('click', () => {
+            this.hideNicknameOverlay();
+        });
+        
+        // Enterキーでも送信
+        nicknameInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                submitScoreBtn.click();
+            }
+        });
     }
     
     showScreen(screenId) {
@@ -676,7 +740,13 @@ class FallingGame {
         }
         this.score = 0;
         this.fallingChars = [];
+        
+        // game-areaをクリア（オーバーレイは保持）
+        const overlay = document.getElementById('nickname-overlay');
         this.gameArea.innerHTML = '';
+        if (overlay && overlay.parentElement !== this.gameArea) {
+            this.gameArea.appendChild(overlay);
+        }
         
         // 背景色をノーマルに戻す
         this.gameArea.style.background = 'linear-gradient(180deg, #f0f8ff 0%, #e6f3ff 50%, #d9ecff 100%)';
@@ -715,41 +785,57 @@ class FallingGame {
             this.spawnInterval = null;
         }
         
-        // ハイスコアを保存
-        this.saveHighScore(this.score);
+        // ハイスコアをチェック（保存前に）
+        const mode = this.isSuperHardMode ? 'superhard' : (this.isHardMode ? 'hard' : 'normal');
+        const scores = this.getHighScores(mode);
+        const isNewHighScore = scores.length === 0 || this.score > scores[0].score;
+        
+        console.log('Current score:', this.score);
+        console.log('Existing scores:', scores);
+        console.log('Is new high score:', isNewHighScore);
         
         this.startBtn.textContent = 'リトライ';
         this.startBtn.disabled = false;
         
-        // ゲームオーバー表示
-        const gameOverDiv = document.createElement('div');
-        gameOverDiv.style.cssText = `
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: rgba(0,0,0,0.9);
-            color: white;
-            padding: 30px 40px;
-            border-radius: 10px;
-            text-align: center;
-            z-index: 10;
-            border: 2px solid #00ffff;
-            box-shadow: 0 0 20px rgba(0, 255, 255, 0.5);
-        `;
-        gameOverDiv.innerHTML = `
-            <div style="font-size: 28px; font-weight: 700; color: #00ffff; text-shadow: 0 0 10px #00ffff; margin-bottom: 15px; white-space: nowrap;">ゲームオーバー</div>
-            <div style="font-size: 20px; margin-top: 10px;">最終スコア: ${this.score}</div>
-        `;
+        // ハイスコア更新時はニックネーム入力を表示、それ以外はゲームオーバー表示
+        if (isNewHighScore) {
+            console.log('Showing nickname overlay...');
+            // すぐにニックネーム入力を表示
+            this.showNicknameOverlay();
+        } else {
+            // ゲームオーバー表示
+            const gameOverDiv = document.createElement('div');
+            gameOverDiv.style.cssText = `
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                background: rgba(0,0,0,0.9);
+                color: white;
+                padding: 30px 40px;
+                border-radius: 10px;
+                text-align: center;
+                z-index: 10;
+                border: 2px solid #00ffff;
+                box-shadow: 0 0 20px rgba(0, 255, 255, 0.5);
+            `;
+            gameOverDiv.innerHTML = `
+                <div style="font-size: 28px; font-weight: 700; color: #00ffff; text-shadow: 0 0 10px #00ffff; margin-bottom: 15px; white-space: nowrap;">ゲームオーバー</div>
+                <div style="font-size: 20px; margin-top: 10px;">最終スコア: ${this.score}</div>
+            `;
+            
+            this.gameArea.appendChild(gameOverDiv);
+            
+            // 3秒後にゲームオーバー表示を削除
+            setTimeout(() => {
+                if (this.gameArea.contains(gameOverDiv)) {
+                    this.gameArea.removeChild(gameOverDiv);
+                }
+            }, 3000);
+        }
         
-        this.gameArea.appendChild(gameOverDiv);
-        
-        // 3秒後にゲームオーバー表示を削除
-        setTimeout(() => {
-            if (this.gameArea.contains(gameOverDiv)) {
-                this.gameArea.removeChild(gameOverDiv);
-            }
-        }, 3000);
+        // ローカルハイスコアを保存（チェック後に）
+        this.saveHighScore(this.score);
     }
     
     saveHighScore(score) {
@@ -785,25 +871,155 @@ class FallingGame {
     
     displayHighScores() {
         const highscoreList = document.getElementById('highscore-list');
-        const scores = this.getHighScores(this.currentTab);
         
-        if (scores.length === 0) {
-            highscoreList.innerHTML = '<p class="no-scores">まだスコアがありません</p>';
-            return;
+        if (this.currentRankingTab === 'local') {
+            // ローカルランキング
+            const scores = this.getHighScores(this.currentTab);
+            
+            if (scores.length === 0) {
+                highscoreList.innerHTML = '<p class="no-scores">まだスコアがありません</p>';
+                return;
+            }
+            
+            let html = '<ol class="score-list">';
+            scores.forEach((item, index) => {
+                html += `
+                    <li class="score-item">
+                        <span class="rank">${index + 1}</span>
+                        <span class="score-value">${item.score}点</span>
+                    </li>
+                `;
+            });
+            html += '</ol>';
+            
+            highscoreList.innerHTML = html;
+        } else {
+            // グローバルランキング
+            this.displayGlobalRanking();
         }
+    }
+    
+    // グローバルランキングを表示
+    async displayGlobalRanking() {
+        const highscoreList = document.getElementById('highscore-list');
+        highscoreList.innerHTML = '<p class="loading-message">読み込み中...</p>';
         
-        let html = '<ol class="score-list">';
-        scores.forEach((item, index) => {
-            html += `
-                <li class="score-item">
-                    <span class="rank">${index + 1}</span>
-                    <span class="score-value">${item.score}点</span>
-                </li>
-            `;
-        });
-        html += '</ol>';
+        try {
+            const mode = this.currentTab;
+            const dbRef = window.firebaseRef(window.firebaseDB, `rankings/${mode}`);
+            const rankingQuery = window.firebaseQuery(
+                dbRef,
+                window.firebaseOrderByChild('score'),
+                window.firebaseLimitToLast(100)
+            );
+            
+            const snapshot = await window.firebaseGet(rankingQuery);
+            
+            if (!snapshot.exists()) {
+                highscoreList.innerHTML = '<p class="no-scores">まだスコアがありません</p>';
+                return;
+            }
+            
+            // データを配列に変換してソート
+            const rankings = [];
+            snapshot.forEach((childSnapshot) => {
+                rankings.push({
+                    ...childSnapshot.val(),
+                    id: childSnapshot.key
+                });
+            });
+            
+            // スコアで降順ソート
+            rankings.sort((a, b) => b.score - a.score);
+            
+            // トップ100を表示
+            let html = '<ol class="score-list">';
+            rankings.slice(0, 100).forEach((item, index) => {
+                html += `
+                    <li class="score-item">
+                        <span class="rank">${index + 1}</span>
+                        <span class="score-value">${item.score}点</span>
+                        <span class="nickname">${this.escapeHtml(item.nickname)}</span>
+                    </li>
+                `;
+            });
+            html += '</ol>';
+            
+            highscoreList.innerHTML = html;
+        } catch (error) {
+            console.error('ランキング取得エラー:', error);
+            highscoreList.innerHTML = '<div class="no-scores">ランキングの読み込みに失敗しました</div>';
+        }
+    }
+    
+    // HTMLエスケープ
+    escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+    
+    // トースト通知を表示
+    showToast(message, type = 'info') {
+        const toast = document.createElement('div');
+        toast.className = `toast toast-${type}`;
+        toast.textContent = message;
+        document.body.appendChild(toast);
         
-        highscoreList.innerHTML = html;
+        // アニメーション
+        setTimeout(() => toast.classList.add('show'), 10);
+        
+        // 3秒後に削除
+        setTimeout(() => {
+            toast.classList.remove('show');
+            setTimeout(() => document.body.removeChild(toast), 300);
+        }, 3000);
+    }
+    
+    // ニックネーム入力オーバーレイを表示
+    showNicknameOverlay() {
+        const finalScore = this.score;
+        document.getElementById('final-score-value').textContent = finalScore;
+        document.getElementById('nickname-input').value = '';
+        document.getElementById('nickname-overlay').classList.remove('hidden');
+        
+        // ゲームコントロールボタンを無効化
+        document.getElementById('start-btn').disabled = true;
+        document.getElementById('back-to-menu-btn').disabled = true;
+        
+        // 入力フィールドにフォーカス
+        setTimeout(() => {
+            document.getElementById('nickname-input').focus();
+        }, 100);
+    }
+    
+    // ニックネーム入力オーバーレイを非表示
+    hideNicknameOverlay() {
+        document.getElementById('nickname-overlay').classList.add('hidden');
+        
+        // ゲームコントロールボタンを有効化
+        document.getElementById('start-btn').disabled = false;
+        document.getElementById('back-to-menu-btn').disabled = false;
+    }
+    
+    // スコアをFirebaseに送信
+    async submitScoreToFirebase(nickname, score) {
+        try {
+            const mode = this.isSuperHardMode ? 'superhard' : (this.isHardMode ? 'hard' : 'normal');
+            const dbRef = window.firebaseRef(window.firebaseDB, `rankings/${mode}`);
+            const newScoreRef = window.firebasePush(dbRef);
+            
+            await window.firebaseSet(newScoreRef, {
+                nickname: nickname,
+                score: score,
+                timestamp: Date.now()
+            });
+            
+            return true;
+        } catch (error) {
+            console.error('スコア送信エラー:', error);
+            return false;
+        }
     }
 }
 
