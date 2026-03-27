@@ -22,6 +22,7 @@ class FallingGame {
         this.init();
         this.initScreenNavigation();
         this.checkSuperHardUnlock();
+        this.initRankingName(); // ランキング名の初期化
     }
     
     // スーパーハードのアンロック状態をチェック
@@ -150,6 +151,39 @@ class FallingGame {
         this.setupTouchEvents();
     }
     
+    // ランキング名の初期化（イベントリスナーのみ設定）
+    initRankingName() {
+        const rankingNameInput = document.getElementById('ranking-name-input');
+        const saveNameBtn = document.getElementById('save-name-btn');
+        
+        // 保存ボタンクリック時
+        saveNameBtn.addEventListener('click', () => {
+            const name = rankingNameInput.value.trim() || 'aaa';
+            localStorage.setItem('rankingName', name);
+            this.showToast('保存しました', 'info');
+        });
+        
+        // タッチイベントも追加（iOS対応）
+        saveNameBtn.addEventListener('touchend', (e) => {
+            e.preventDefault();
+            const name = rankingNameInput.value.trim() || 'aaa';
+            localStorage.setItem('rankingName', name);
+            this.showToast('保存しました', 'info');
+        });
+    }
+    
+    // ランキング名を読み込む（設定画面を開くたびに呼ばれる）
+    loadRankingName() {
+        const rankingNameInput = document.getElementById('ranking-name-input');
+        const savedName = localStorage.getItem('rankingName') || 'aaa';
+        rankingNameInput.value = savedName;
+    }
+    
+    // ランキング名を取得
+    getRankingName() {
+        return localStorage.getItem('rankingName') || 'aaa';
+    }
+    
     setupTouchEvents() {
         this.gameArea.addEventListener('touchend', (e) => {
             e.preventDefault();
@@ -176,12 +210,8 @@ class FallingGame {
         this.score = 0;
         this.fallingChars = [];
         
-        // game-areaをクリア（オーバーレイは保持）
-        const overlay = document.getElementById('nickname-overlay');
+        // game-areaをクリア
         this.gameArea.innerHTML = '';
-        if (overlay && overlay.parentElement !== this.gameArea) {
-            this.gameArea.appendChild(overlay);
-        }
         
         // モードに応じて初期速度を設定
         if (this.isSuperHardMode) {
@@ -558,11 +588,13 @@ class FallingGame {
         
         settingsBtn.addEventListener('click', () => {
             this.showScreen('settings-screen');
+            this.loadRankingName();
         });
         settingsBtn.addEventListener('touchend', (e) => {
             e.preventDefault();
             this.showScreen('settings-screen');
             this.loadSettings();
+            this.loadRankingName();
         });
         
         // 設定のトグルスイッチ
@@ -681,55 +713,6 @@ class FallingGame {
             localRankingTab.classList.remove('active');
             this.displayHighScores();
         });
-        
-        // ニックネーム入力画面のイベントリスナー
-        const submitScoreBtn = document.getElementById('submit-score-btn');
-        const skipRankingBtn = document.getElementById('skip-ranking-btn');
-        const nicknameInput = document.getElementById('nickname-input');
-        
-        const handleSubmit = async (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            
-            if (submitScoreBtn.disabled) return;
-            
-            const nickname = nicknameInput.value.trim();
-            if (!nickname) {
-                this.showToast('ニックネームを入力してください', 'error');
-                return;
-            }
-            
-            submitScoreBtn.disabled = true;
-            submitScoreBtn.textContent = '送信中...';
-            
-            const finalScore = parseInt(document.getElementById('final-score-value').textContent);
-            const success = await this.submitScoreToFirebase(nickname, finalScore);
-            
-            submitScoreBtn.disabled = false;
-            submitScoreBtn.textContent = '登録する';
-            
-            this.hideNicknameOverlay();
-            
-            if (!success) {
-                this.showToast('登録に失敗しました', 'error');
-            }
-        };
-        
-        const handleSkip = (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            this.hideNicknameOverlay();
-        };
-        
-        submitScoreBtn.addEventListener('touchend', handleSubmit);
-        skipRankingBtn.addEventListener('touchend', handleSkip);
-        
-        // Enterキーでも送信
-        nicknameInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') {
-                submitScoreBtn.click();
-            }
-        });
     }
     
     showScreen(screenId) {
@@ -751,12 +734,8 @@ class FallingGame {
         this.score = 0;
         this.fallingChars = [];
         
-        // game-areaをクリア（オーバーレイは保持）
-        const overlay = document.getElementById('nickname-overlay');
+        // game-areaをクリア
         this.gameArea.innerHTML = '';
-        if (overlay && overlay.parentElement !== this.gameArea) {
-            this.gameArea.appendChild(overlay);
-        }
         
         // 背景色をノーマルに戻す
         this.gameArea.style.background = 'linear-gradient(180deg, #f0f8ff 0%, #e6f3ff 50%, #d9ecff 100%)';
@@ -795,57 +774,45 @@ class FallingGame {
             this.spawnInterval = null;
         }
         
-        // ハイスコアをチェック（保存前に）
-        const mode = this.isSuperHardMode ? 'superhard' : (this.isHardMode ? 'hard' : 'normal');
-        const scores = this.getHighScores(mode);
-        const isNewHighScore = scores.length === 0 || this.score > scores[0].score;
-        
-        console.log('Current score:', this.score);
-        console.log('Existing scores:', scores);
-        console.log('Is new high score:', isNewHighScore);
-        
         this.startBtn.textContent = 'リトライ';
         this.startBtn.disabled = false;
         
-        // ハイスコア更新時はニックネーム入力を表示、それ以外はゲームオーバー表示
-        if (isNewHighScore) {
-            console.log('Showing nickname overlay...');
-            // すぐにニックネーム入力を表示
-            this.showNicknameOverlay();
-        } else {
-            // ゲームオーバー表示
-            const gameOverDiv = document.createElement('div');
-            gameOverDiv.style.cssText = `
-                position: absolute;
-                top: 50%;
-                left: 50%;
-                transform: translate(-50%, -50%);
-                background: rgba(0,0,0,0.9);
-                color: white;
-                padding: 30px 40px;
-                border-radius: 10px;
-                text-align: center;
-                z-index: 10;
-                border: 2px solid #00ffff;
-                box-shadow: 0 0 20px rgba(0, 255, 255, 0.5);
-            `;
-            gameOverDiv.innerHTML = `
-                <div style="font-size: 28px; font-weight: 700; color: #00ffff; text-shadow: 0 0 10px #00ffff; margin-bottom: 15px; white-space: nowrap;">ゲームオーバー</div>
-                <div style="font-size: 20px; margin-top: 10px;">最終スコア: ${this.score}</div>
-            `;
-            
-            this.gameArea.appendChild(gameOverDiv);
-            
-            // 3秒後にゲームオーバー表示を削除
-            setTimeout(() => {
-                if (this.gameArea.contains(gameOverDiv)) {
-                    this.gameArea.removeChild(gameOverDiv);
-                }
-            }, 3000);
-        }
+        // ゲームオーバー表示
+        const gameOverDiv = document.createElement('div');
+        gameOverDiv.style.cssText = `
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0,0,0,0.9);
+            color: white;
+            padding: 30px 40px;
+            border-radius: 10px;
+            text-align: center;
+            z-index: 10;
+            border: 2px solid #00ffff;
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.5);
+        `;
+        gameOverDiv.innerHTML = `
+            <div style="font-size: 28px; font-weight: 700; color: #00ffff; text-shadow: 0 0 10px #00ffff; margin-bottom: 15px; white-space: nowrap;">ゲームオーバー</div>
+            <div style="font-size: 20px; margin-top: 10px;">最終スコア: ${this.score}</div>
+        `;
         
-        // ローカルハイスコアを保存（チェック後に）
+        this.gameArea.appendChild(gameOverDiv);
+        
+        // 3秒後にゲームオーバー表示を削除
+        setTimeout(() => {
+            if (this.gameArea.contains(gameOverDiv)) {
+                this.gameArea.removeChild(gameOverDiv);
+            }
+        }, 3000);
+        
+        // ローカルハイスコアを保存
         this.saveHighScore(this.score);
+        
+        // Firebaseに自動送信
+        const nickname = this.getRankingName();
+        this.submitScoreToFirebase(nickname, this.score);
     }
     
     saveHighScore(score) {
@@ -984,32 +951,6 @@ class FallingGame {
             toast.classList.remove('show');
             setTimeout(() => document.body.removeChild(toast), 300);
         }, 3000);
-    }
-    
-    // ニックネーム入力オーバーレイを表示
-    showNicknameOverlay() {
-        const finalScore = this.score;
-        document.getElementById('final-score-value').textContent = finalScore;
-        document.getElementById('nickname-input').value = '';
-        document.getElementById('nickname-overlay').classList.remove('hidden');
-        
-        // ゲームコントロールボタンを無効化
-        document.getElementById('start-btn').disabled = true;
-        document.getElementById('back-to-menu-btn').disabled = true;
-        
-        // 入力フィールドにフォーカス
-        setTimeout(() => {
-            document.getElementById('nickname-input').focus();
-        }, 100);
-    }
-    
-    // ニックネーム入力オーバーレイを非表示
-    hideNicknameOverlay() {
-        document.getElementById('nickname-overlay').classList.add('hidden');
-        
-        // ゲームコントロールボタンを有効化
-        document.getElementById('start-btn').disabled = false;
-        document.getElementById('back-to-menu-btn').disabled = false;
     }
     
     // スコアをFirebaseに送信

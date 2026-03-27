@@ -77,6 +77,13 @@
                         <span class="toggle-slider"></span>
                     </label>
                 </div>
+                <div class="setting-item name-setting">
+                    <span class="setting-label">ランキング表示名</span>
+                    <div class="name-input-row">
+                        <input type="text" id="ranking-name-input" class="ranking-name-input" maxlength="10" placeholder="aaa">
+                        <button id="save-name-btn" class="save-name-btn">保存</button>
+                    </div>
+                </div>
             </div>
             <button id="back-from-settings-btn" class="back-btn">戻る</button>
         </div>
@@ -99,22 +106,6 @@
                 <!-- ハイスコアリストがここに表示される -->
             </div>
             <button id="back-from-highscore-btn" class="back-btn">戻る</button>
-        </div>
-    </div>
-
-    <!-- ニックネーム入力オーバーレイ（画面全体の中央に表示） -->
-    <div id="nickname-overlay" class="hidden">
-        <div id="nickname-popup">
-            <h2>🎉 ハイスコア更新！</h2>
-            <p class="final-score">スコア: <span id="final-score-value">0</span></p>
-            <div class="nickname-input-group">
-                <label for="nickname-input">ニックネーム</label>
-                <input type="text" id="nickname-input" maxlength="10" placeholder="名前を入力">
-            </div>
-            <div class="nickname-buttons">
-                <button id="submit-score-btn" class="popup-btn">登録する</button>
-                <button id="skip-ranking-btn" class="popup-btn secondary">スキップ</button>
-            </div>
         </div>
     </div>
 
