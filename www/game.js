@@ -18,11 +18,13 @@ class FallingGame {
         this.currentTab = 'normal'; // ハイスコア画面のタブ
         this.currentRankingTab = 'local'; // ランキングタブ（local/global）
         this.audioContext = null; // Web Audio API用
+        this.credits = this.loadCredits(); // クレジット数
         
         this.init();
         this.initScreenNavigation();
         this.checkSuperHardUnlock();
         this.initRankingName(); // ランキング名の初期化
+        this.updateCreditDisplay(); // クレジット表示を更新
     }
     
     // スーパーハードのアンロック状態をチェック
@@ -184,6 +186,157 @@ class FallingGame {
         return localStorage.getItem('rankingName') || 'aaa';
     }
     
+    // クレジットを読み込む
+    loadCredits() {
+        const saved = localStorage.getItem('gameCredits');
+        return saved ? parseInt(saved) : 10;
+    }
+    
+    // クレジットを保存
+    saveCredits() {
+        localStorage.setItem('gameCredits', this.credits.toString());
+    }
+    
+    // クレジット表示を更新
+    updateCreditDisplay() {
+        document.getElementById('credit-value').textContent = this.credits;
+    }
+    
+    // クレジットを消費
+    useCredit() {
+        if (this.credits > 0) {
+            this.credits--;
+            this.saveCredits();
+            this.updateCreditDisplay();
+            return true;
+        }
+        return false;
+    }
+    
+    // クレジットを回復（広告視聴後）
+    restoreCredits() {
+        this.credits = 10;
+        this.saveCredits();
+        this.updateCreditDisplay();
+    }
+    
+    // クレジットが0かチェック
+    hasCredits() {
+        return this.credits > 0;
+    }
+    
+    // 広告視聴プロンプトを表示
+    showAdPrompt() {
+        const overlay = document.createElement('div');
+        overlay.style.cssText = `
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 99999;
+        `;
+        
+        const popup = document.createElement('div');
+        popup.style.cssText = `
+            background: rgba(0, 0, 0, 0.95);
+            border: 2px solid #00ffff;
+            border-radius: 12px;
+            padding: 30px;
+            text-align: center;
+            max-width: 350px;
+            box-shadow: 0 0 30px rgba(0, 255, 255, 0.5);
+        `;
+        
+        popup.innerHTML = `
+            <h2 style="color: #00ffff; font-size: 24px; margin-bottom: 20px; text-shadow: 0 0 10px #00ffff;">クレジット不足</h2>
+            <p style="color: #ffffff; font-size: 16px; margin-bottom: 25px;">広告を視聴してクレジットを回復しますか？</p>
+            <button id="watch-ad-btn" style="
+                width: 100%;
+                padding: 15px;
+                font-size: 18px;
+                font-weight: 700;
+                background: #00ffff;
+                color: #000;
+                border: none;
+                border-radius: 8px;
+                cursor: pointer;
+                margin-bottom: 10px;
+                transition: all 0.3s;
+            ">広告を見る（クレジット10回復）</button>
+            <button id="cancel-ad-btn" style="
+                width: 100%;
+                padding: 15px;
+                font-size: 16px;
+                font-weight: 700;
+                background: transparent;
+                color: #ffffff;
+                border: 2px solid #666;
+                border-radius: 8px;
+                cursor: pointer;
+                transition: all 0.3s;
+            ">キャンセル</button>
+        `;
+        
+        overlay.appendChild(popup);
+        document.body.appendChild(overlay);
+        
+        // 広告を見るボタン
+        document.getElementById('watch-ad-btn').addEventListener('click', () => {
+            document.body.removeChild(overlay);
+            this.showRewardedAd();
+        });
+        
+        // キャンセルボタン
+        document.getElementById('cancel-ad-btn').addEventListener('click', () => {
+            document.body.removeChild(overlay);
+        });
+    }
+    
+    // リワード広告を表示（AdMobと連携）
+    async showRewardedAd() {
+        try {
+            // Capacitorプラグインが利用可能かチェック
+            if (typeof window.Capacitor === 'undefined' || !window.Capacitor.Plugins.AdMob) {
+                // Web環境またはプラグインが無い場合はテスト用
+                console.log('AdMob plugin not available, using test mode');
+                this.showToast('広告視聴完了！クレジットを回復しました', 'info');
+                this.restoreCredits();
+                return;
+            }
+            
+            const { AdMob } = window.Capacitor.Plugins;
+            
+            // AdMobを初期化
+            await AdMob.initialize({
+                requestTrackingAuthorization: true,
+                testingDevices: [],
+                initializeForTesting: false
+            });
+            
+            // リワード広告を準備
+            await AdMob.prepareRewardVideoAd({
+                adId: 'ca-app-pub-8707369701475326/7758538922',
+                isTesting: false
+            });
+            
+            // 広告を表示
+            await AdMob.showRewardVideoAd();
+            
+            // 広告視聴完了
+            this.showToast('広告視聴完了！クレジットを回復しました', 'info');
+            this.restoreCredits();
+            
+        } catch (error) {
+            console.error('AdMob error:', error);
+            this.showToast('広告の読み込みに失敗しました', 'error');
+        }
+    }
+    
     setupTouchEvents() {
         this.gameArea.addEventListener('touchend', (e) => {
             e.preventDefault();
@@ -205,6 +358,15 @@ class FallingGame {
     
     startGame() {
         if (this.gameRunning) return;
+        
+        // クレジットチェック
+        if (!this.hasCredits()) {
+            this.showAdPrompt();
+            return;
+        }
+        
+        // クレジットを消費
+        this.useCredit();
         
         this.gameRunning = true;
         this.score = 0;

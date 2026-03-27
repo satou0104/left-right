@@ -333,6 +333,24 @@ html::before {
     width: 90%;
     max-width: 400px;
     border: 2px solid #00ffff;
+    position: relative;
+}
+
+/* クレジット表示 */
+#credit-display {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    padding: 8px 12px;
+    font-size: 14px;
+    font-weight: 700;
+    color: #00ffff;
+    text-shadow: 0 0 10px rgba(0, 255, 255, 0.8);
+}
+
+#credit-value {
+    font-size: 16px;
+    color: #ffffff;
 }
 
 #game-title {
