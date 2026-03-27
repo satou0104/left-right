@@ -299,14 +299,6 @@ class FallingGame {
     
     // リワード広告を表示（AdMobと連携）
     async showRewardedAd() {
-        // TODO: AdMobプラグインのインストール後に有効化
-        // 現在はテスト用に即座にクレジット回復
-        console.log('AdMob integration pending');
-        this.showToast('広告視聴完了！クレジットを回復しました', 'info');
-        this.restoreCredits();
-        return;
-        
-        /* AdMob統合コード（後で有効化）
         try {
             // Capacitorプラグインが利用可能かチェック
             if (typeof window.Capacitor === 'undefined' || !window.Capacitor.Plugins.AdMob) {
@@ -321,15 +313,12 @@ class FallingGame {
             
             // AdMobを初期化
             await AdMob.initialize({
-                requestTrackingAuthorization: true,
-                testingDevices: [],
-                initializeForTesting: false
+                requestTrackingAuthorization: true
             });
             
             // リワード広告を準備
             await AdMob.prepareRewardVideoAd({
-                adId: 'ca-app-pub-8707369701475326/7758538922',
-                isTesting: false
+                adId: 'ca-app-pub-8707369701475326/7758538922'
             });
             
             // 広告を表示
@@ -341,9 +330,10 @@ class FallingGame {
             
         } catch (error) {
             console.error('AdMob error:', error);
-            this.showToast('広告の読み込みに失敗しました', 'error');
+            // エラー時もクレジット回復（ユーザー体験を優先）
+            this.showToast('広告視聴完了！クレジットを回復しました', 'info');
+            this.restoreCredits();
         }
-        */
     }
     
     setupTouchEvents() {
