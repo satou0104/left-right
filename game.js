@@ -687,7 +687,12 @@ class FallingGame {
         const skipRankingBtn = document.getElementById('skip-ranking-btn');
         const nicknameInput = document.getElementById('nickname-input');
         
-        submitScoreBtn.addEventListener('click', async () => {
+        const handleSubmit = async (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            
+            if (submitScoreBtn.disabled) return;
+            
             const nickname = nicknameInput.value.trim();
             if (!nickname) {
                 this.showToast('ニックネームを入力してください', 'error');
@@ -708,11 +713,16 @@ class FallingGame {
             if (!success) {
                 this.showToast('登録に失敗しました', 'error');
             }
-        });
+        };
         
-        skipRankingBtn.addEventListener('click', () => {
+        const handleSkip = (e) => {
+            e.preventDefault();
+            e.stopPropagation();
             this.hideNicknameOverlay();
-        });
+        };
+        
+        submitScoreBtn.addEventListener('touchend', handleSubmit);
+        skipRankingBtn.addEventListener('touchend', handleSkip);
         
         // Enterキーでも送信
         nicknameInput.addEventListener('keypress', (e) => {
