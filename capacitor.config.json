@@ -2,10 +2,5 @@
   "appId": "com.satou0104.sayuurakka",
   "appName": "左右落下",
   "webDir": "www",
-  "bundledWebRuntime": false,
-  "plugins": {
-    "AdMob": {
-      "appId": "ca-app-pub-8707369701475326~6329907180"
-    }
-  }
+  "bundledWebRuntime": false
 }

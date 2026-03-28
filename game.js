@@ -297,43 +297,12 @@ class FallingGame {
         });
     }
     
-    // リワード広告を表示（AdMobと連携）
+    // リワード広告を表示（テストモード）
     async showRewardedAd() {
-        try {
-            // Capacitorプラグインが利用可能かチェック
-            if (typeof window.Capacitor === 'undefined' || !window.Capacitor.Plugins.AdMob) {
-                // Web環境またはプラグインが無い場合はテスト用
-                console.log('AdMob plugin not available, using test mode');
-                this.showToast('広告視聴完了！クレジットを回復しました', 'info');
-                this.restoreCredits();
-                return;
-            }
-            
-            const { AdMob } = window.Capacitor.Plugins;
-            
-            // AdMobを初期化
-            await AdMob.initialize({
-                requestTrackingAuthorization: true
-            });
-            
-            // リワード広告を準備
-            await AdMob.prepareRewardVideoAd({
-                adId: 'ca-app-pub-8707369701475326/7758538922'
-            });
-            
-            // 広告を表示
-            await AdMob.showRewardVideoAd();
-            
-            // 広告視聴完了
-            this.showToast('広告視聴完了！クレジットを回復しました', 'info');
-            this.restoreCredits();
-            
-        } catch (error) {
-            console.error('AdMob error:', error);
-            // エラー時もクレジット回復（ユーザー体験を優先）
-            this.showToast('広告視聴完了！クレジットを回復しました', 'info');
-            this.restoreCredits();
-        }
+        // 広告機能は次のバージョンで実装予定
+        console.log('Ad feature coming soon');
+        this.showToast('クレジットを回復しました', 'info');
+        this.restoreCredits();
     }
     
     setupTouchEvents() {
