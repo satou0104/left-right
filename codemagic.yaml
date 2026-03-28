@@ -36,18 +36,9 @@ workflows:
           xcode-project use-profiles
       - name: Build ipa for distribution
         script: |
-          xcodebuild -project "$XCODE_PROJECT" \
-            -scheme "$XCODE_SCHEME" \
-            -configuration Release \
-            -derivedDataPath build \
-            -archivePath build/App.xcarchive \
-            archive
-      - name: Export ipa
-        script: |
-          xcodebuild -exportArchive \
-            -archivePath build/App.xcarchive \
-            -exportOptionsPlist ios/App/ExportOptions.plist \
-            -exportPath build/ios/ipa
+          xcode-project build-ipa \
+            --project "$XCODE_PROJECT" \
+            --scheme "$XCODE_SCHEME"
     artifacts:
       - build/ios/ipa/*.ipa
       - /tmp/xcodebuild_logs/*.log
