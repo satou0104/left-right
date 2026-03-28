@@ -550,6 +550,31 @@ html::before {
     transform: scale(0.95);
 }
 
+/* クレジット表記 */
+.credit-section {
+    margin-top: 30px;
+    padding-top: 20px;
+    border-top: 1px solid rgba(0, 255, 255, 0.3);
+    text-align: center;
+}
+
+.credit-text {
+    font-size: 14px;
+    color: rgba(255, 255, 255, 0.7);
+    margin: 5px 0;
+}
+
+.credit-text a {
+    color: #00ffff;
+    text-decoration: none;
+    transition: all 0.3s;
+}
+
+.credit-text a:hover {
+    color: #00cccc;
+    text-decoration: underline;
+}
+
 /* トグルスイッチ */
 .toggle-switch {
     position: relative;
