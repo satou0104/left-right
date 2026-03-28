@@ -19,12 +19,15 @@ class FallingGame {
         this.currentRankingTab = 'local'; // ランキングタブ（local/global）
         this.audioContext = null; // Web Audio API用
         this.credits = this.loadCredits(); // クレジット数
+        this.bgmAudio = null; // BGM用のAudioオブジェクト
+        this.bgmEnabled = true; // BGMの有効/無効
         
         this.init();
         this.initScreenNavigation();
         this.checkSuperHardUnlock();
         this.initRankingName(); // ランキング名の初期化
         this.updateCreditDisplay(); // クレジット表示を更新
+        this.initBGM(); // BGMの初期化
     }
     
     // スーパーハードのアンロック状態をチェック
@@ -138,6 +141,93 @@ class FallingGame {
     loadSettings() {
         const soundToggle = document.getElementById('sound-toggle');
         soundToggle.checked = this.getSoundEnabled();
+        
+        const bgmToggle = document.getElementById('bgm-toggle');
+        bgmToggle.checked = this.getBGMEnabled();
+    }
+    
+    // BGMの初期化
+    initBGM() {
+        this.bgmAudio = new Audio('bgm.mp3');
+        this.bgmAudio.loop = true;
+        this.bgmAudio.volume = 0.3; // 音量を30%に設定
+        
+        // localStorageからBGM設定を読み込む
+        const savedBGM = localStorage.getItem('bgmEnabled');
+        this.bgmEnabled = savedBGM === null ? true : savedBGM === 'true';
+        
+        // BGMトグルのイベントリスナー
+        const bgmToggle = document.getElementById('bgm-toggle');
+        if (bgmToggle) {
+            bgmToggle.addEventListener('change', (e) => {
+                this.setBGMEnabled(e.target.checked);
+            });
+        }
+        
+        // ユーザーの最初のクリックでAudioContextを有効化
+        const enableAudio = () => {
+            if (this.bgmAudio && this.bgmAudio.paused) {
+                // 一度再生を試みる（自動再生ポリシー対策）
+                this.bgmAudio.play().then(() => {
+                    this.bgmAudio.pause();
+                    this.bgmAudio.currentTime = 0;
+                }).catch(err => {
+                    console.log('BGM初期化:', err);
+                });
+            }
+            document.removeEventListener('click', enableAudio);
+            document.removeEventListener('touchend', enableAudio);
+        };
+        
+        document.addEventListener('click', enableAudio, { once: true });
+        document.addEventListener('touchend', enableAudio, { once: true });
+    }
+    
+    // BGMの有効/無効を取得
+    getBGMEnabled() {
+        return this.bgmEnabled;
+    }
+    
+    // BGMの有効/無効を設定
+    setBGMEnabled(enabled) {
+        this.bgmEnabled = enabled;
+        localStorage.setItem('bgmEnabled', enabled);
+        
+        if (enabled && this.gameRunning) {
+            this.playBGM();
+        } else {
+            this.stopBGM();
+        }
+    }
+    
+    // BGMを再生
+    playBGM() {
+        if (this.bgmEnabled && this.bgmAudio) {
+            const playPromise = this.bgmAudio.play();
+            if (playPromise !== undefined) {
+                playPromise.then(() => {
+                    console.log('BGM再生開始');
+                }).catch(err => {
+                    console.log('BGM再生エラー:', err);
+                    // 自動再生がブロックされた場合、次のユーザー操作で再試行
+                    const retryPlay = () => {
+                        this.playBGM();
+                        document.removeEventListener('click', retryPlay);
+                        document.removeEventListener('touchend', retryPlay);
+                    };
+                    document.addEventListener('click', retryPlay, { once: true });
+                    document.addEventListener('touchend', retryPlay, { once: true });
+                });
+            }
+        }
+    }
+    
+    // BGMを停止
+    stopBGM() {
+        if (this.bgmAudio) {
+            this.bgmAudio.pause();
+            this.bgmAudio.currentTime = 0;
+        }
     }
     
     init() {
@@ -311,9 +401,7 @@ class FallingGame {
             const { AdMob } = window.Capacitor.Plugins;
             
             // AdMobを初期化
-            await AdMob.initialize({
-                requestTrackingAuthorization: true
-            });
+            await AdMob.initialize();
             
             // リワード広告を準備
             await AdMob.prepareRewardVideoAd({
@@ -409,6 +497,9 @@ class FallingGame {
         // 定期的な文字生成を開始
         this.startSpawning();
         this.gameLoop();
+        
+        // BGMを再生
+        this.playBGM();
     }
     
     gameLoop() {
@@ -896,6 +987,9 @@ class FallingGame {
         this.score = 0;
         this.fallingChars = [];
         
+        // BGMを停止
+        this.stopBGM();
+        
         // game-areaをクリア
         this.gameArea.innerHTML = '';
         
@@ -929,6 +1023,9 @@ class FallingGame {
         
         // ミス音を再生
         this.playErrorSound();
+        
+        // BGMを停止
+        this.stopBGM();
         
         // インターバルをクリア
         if (this.spawnInterval) {

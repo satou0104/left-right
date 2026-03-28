@@ -23,6 +23,7 @@ workflows:
           cp index.html www/
           cp game.js www/
           cp style.css www/
+          cp 330_BPM120.mp3 www/bgm.mp3
       - name: Capacitor sync
         script: |
           npm install -g @capacitor/cli
