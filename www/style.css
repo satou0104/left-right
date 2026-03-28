@@ -523,7 +523,7 @@ html::before {
 }
 
 .save-name-btn {
-    padding: 12px 24px;
+    padding: 12px 20px;
     font-size: 16px;
     font-weight: 700;
     background: #00ffff;
@@ -533,6 +533,7 @@ html::before {
     cursor: pointer;
     transition: all 0.3s;
     white-space: nowrap;
+    min-width: 80px;
 }
 
 .save-name-btn:hover {
