@@ -311,9 +311,7 @@ class FallingGame {
             const { AdMob } = window.Capacitor.Plugins;
             
             // AdMobを初期化
-            await AdMob.initialize({
-                requestTrackingAuthorization: true
-            });
+            await AdMob.initialize();
             
             // リワード広告を準備
             await AdMob.prepareRewardVideoAd({
