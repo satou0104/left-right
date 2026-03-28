@@ -278,6 +278,17 @@ class FallingGame {
     
     // クレジットを読み込む
     loadCredits() {
+        // 最後にクレジットを保存した日付を取得
+        const lastDate = localStorage.getItem('lastCreditDate');
+        const today = this.getTodayDate();
+        
+        // 日付が変わっていたらクレジットをリセット
+        if (lastDate !== today) {
+            localStorage.setItem('lastCreditDate', today);
+            localStorage.setItem('gameCredits', '10');
+            return 10;
+        }
+        
         const saved = localStorage.getItem('gameCredits');
         return saved ? parseInt(saved) : 10;
     }
@@ -285,6 +296,8 @@ class FallingGame {
     // クレジットを保存
     saveCredits() {
         localStorage.setItem('gameCredits', this.credits.toString());
+        // 保存時に日付も更新
+        localStorage.setItem('lastCreditDate', this.getTodayDate());
     }
     
     // クレジット表示を更新
