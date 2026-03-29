@@ -164,23 +164,17 @@ class FallingGame {
             });
         }
         
-        // ユーザーの最初のクリックでAudioContextを有効化
-        const enableAudio = () => {
-            if (this.bgmAudio && this.bgmAudio.paused) {
-                // 一度再生を試みる（自動再生ポリシー対策）
-                this.bgmAudio.play().then(() => {
-                    this.bgmAudio.pause();
-                    this.bgmAudio.currentTime = 0;
-                }).catch(err => {
-                    console.log('BGM初期化:', err);
-                });
+        // ユーザーの最初のクリックでBGMを開始
+        const startBGM = () => {
+            if (this.bgmEnabled) {
+                this.playBGM();
             }
-            document.removeEventListener('click', enableAudio);
-            document.removeEventListener('touchend', enableAudio);
+            document.removeEventListener('click', startBGM);
+            document.removeEventListener('touchend', startBGM);
         };
         
-        document.addEventListener('click', enableAudio, { once: true });
-        document.addEventListener('touchend', enableAudio, { once: true });
+        document.addEventListener('click', startBGM, { once: true });
+        document.addEventListener('touchend', startBGM, { once: true });
     }
     
     // BGMの有効/無効を取得
@@ -193,7 +187,7 @@ class FallingGame {
         this.bgmEnabled = enabled;
         localStorage.setItem('bgmEnabled', enabled);
         
-        if (enabled && this.gameRunning) {
+        if (enabled) {
             this.playBGM();
         } else {
             this.stopBGM();
@@ -278,6 +272,17 @@ class FallingGame {
     
     // クレジットを読み込む
     loadCredits() {
+        // 最後にクレジットを保存した日付を取得
+        const lastDate = localStorage.getItem('lastCreditDate');
+        const today = this.getTodayDate();
+        
+        // 日付が変わっていたらクレジットをリセット
+        if (lastDate !== today) {
+            localStorage.setItem('lastCreditDate', today);
+            localStorage.setItem('gameCredits', '10');
+            return 10;
+        }
+        
         const saved = localStorage.getItem('gameCredits');
         return saved ? parseInt(saved) : 10;
     }
@@ -285,6 +290,8 @@ class FallingGame {
     // クレジットを保存
     saveCredits() {
         localStorage.setItem('gameCredits', this.credits.toString());
+        // 保存時に日付も更新
+        localStorage.setItem('lastCreditDate', this.getTodayDate());
     }
     
     // クレジット表示を更新
@@ -497,9 +504,6 @@ class FallingGame {
         // 定期的な文字生成を開始
         this.startSpawning();
         this.gameLoop();
-        
-        // BGMを再生
-        this.playBGM();
     }
     
     gameLoop() {
@@ -782,6 +786,16 @@ class FallingGame {
     }
     
     initScreenNavigation() {
+        // タイトル画面のスタートボタン
+        const titleStartBtn = document.getElementById('title-start-btn');
+        titleStartBtn.addEventListener('click', () => {
+            this.showScreen('main-menu');
+        });
+        titleStartBtn.addEventListener('touchend', (e) => {
+            e.preventDefault();
+            this.showScreen('main-menu');
+        });
+        
         // メニューボタンのイベントリスナー
         const startMenuBtn = document.getElementById('start-menu-btn');
         const startHardBtn = document.getElementById('start-hard-btn');
@@ -987,9 +1001,6 @@ class FallingGame {
         this.score = 0;
         this.fallingChars = [];
         
-        // BGMを停止
-        this.stopBGM();
-        
         // game-areaをクリア
         this.gameArea.innerHTML = '';
         
@@ -1023,9 +1034,6 @@ class FallingGame {
         
         // ミス音を再生
         this.playErrorSound();
-        
-        // BGMを停止
-        this.stopBGM();
         
         // インターバルをクリア
         if (this.spawnInterval) {

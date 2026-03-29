@@ -1133,3 +1133,97 @@ input:checked + .toggle-slider:before {
     border-color: #00ffff;
     box-shadow: 0 4px 20px rgba(0, 255, 255, 0.3);
 }
+
+
+/* タイトル画面 */
+#title-screen {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #0a0a0a 100%);
+}
+
+#title-container {
+    text-align: center;
+    animation: fadeIn 1s ease-in;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.game-title {
+    font-size: 64px;
+    font-weight: 900;
+    color: #00ffff;
+    text-shadow: 0 0 30px rgba(0, 255, 255, 0.8),
+                 0 0 60px rgba(0, 255, 255, 0.5);
+    margin-bottom: 10px;
+    letter-spacing: 8px;
+    animation: glow 2s ease-in-out infinite alternate;
+}
+
+@keyframes glow {
+    from {
+        text-shadow: 0 0 20px rgba(0, 255, 255, 0.6),
+                     0 0 40px rgba(0, 255, 255, 0.4);
+    }
+    to {
+        text-shadow: 0 0 30px rgba(0, 255, 255, 0.8),
+                     0 0 60px rgba(0, 255, 255, 0.6);
+    }
+}
+
+.game-subtitle {
+    font-size: 20px;
+    color: rgba(255, 255, 255, 0.8);
+    margin-bottom: 60px;
+    letter-spacing: 4px;
+}
+
+.title-start-btn {
+    padding: 20px 60px;
+    font-size: 28px;
+    font-weight: 700;
+    background: linear-gradient(135deg, #00ffff 0%, #00cccc 100%);
+    color: #000;
+    border: none;
+    border-radius: 50px;
+    cursor: pointer;
+    transition: all 0.3s;
+    box-shadow: 0 0 20px rgba(0, 255, 255, 0.5);
+    margin-bottom: 40px;
+    animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+    0%, 100% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.05);
+    }
+}
+
+.title-start-btn:hover {
+    background: linear-gradient(135deg, #00cccc 0%, #009999 100%);
+    box-shadow: 0 0 30px rgba(0, 255, 255, 0.8);
+    transform: scale(1.1);
+}
+
+.title-start-btn:active {
+    transform: scale(0.95);
+}
+
+.version-text {
+    font-size: 14px;
+    color: rgba(255, 255, 255, 0.4);
+    margin-top: 20px;
+}
