@@ -175,6 +175,38 @@ class FallingGame {
         
         document.addEventListener('click', startBGM, { once: true });
         document.addEventListener('touchend', startBGM, { once: true });
+        
+        // アプリがバックグラウンドに移行した時の処理
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden) {
+                // バックグラウンドに移行：BGMを一時停止
+                if (this.bgmAudio && !this.bgmAudio.paused) {
+                    this.bgmAudio.pause();
+                }
+            } else {
+                // フォアグラウンドに復帰：BGMを再開
+                if (this.bgmEnabled && this.bgmAudio && this.bgmAudio.paused) {
+                    this.bgmAudio.play().catch(err => {
+                        console.log('BGM再開エラー:', err);
+                    });
+                }
+            }
+        });
+        
+        // iOSのpause/resumeイベントにも対応
+        window.addEventListener('blur', () => {
+            if (this.bgmAudio && !this.bgmAudio.paused) {
+                this.bgmAudio.pause();
+            }
+        });
+        
+        window.addEventListener('focus', () => {
+            if (this.bgmEnabled && this.bgmAudio && this.bgmAudio.paused) {
+                this.bgmAudio.play().catch(err => {
+                    console.log('BGM再開エラー:', err);
+                });
+            }
+        });
     }
     
     // BGMの有効/無効を取得
