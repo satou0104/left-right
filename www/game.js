@@ -19,15 +19,12 @@ class FallingGame {
         this.currentRankingTab = 'local'; // ランキングタブ（local/global）
         this.audioContext = null; // Web Audio API用
         this.credits = this.loadCredits(); // クレジット数
-        this.bgmAudio = null; // BGM用のAudioオブジェクト
-        this.bgmEnabled = true; // BGMの有効/無効
         
         this.init();
         this.initScreenNavigation();
         this.checkSuperHardUnlock();
         this.initRankingName(); // ランキング名の初期化
         this.updateCreditDisplay(); // クレジット表示を更新
-        this.initBGM(); // BGMの初期化
     }
     
     // スーパーハードのアンロック状態をチェック
@@ -141,119 +138,6 @@ class FallingGame {
     loadSettings() {
         const soundToggle = document.getElementById('sound-toggle');
         soundToggle.checked = this.getSoundEnabled();
-        
-        const bgmToggle = document.getElementById('bgm-toggle');
-        bgmToggle.checked = this.getBGMEnabled();
-    }
-    
-    // BGMの初期化
-    initBGM() {
-        this.bgmAudio = new Audio('bgm.mp3');
-        this.bgmAudio.loop = true;
-        this.bgmAudio.volume = 0.3; // 音量を30%に設定
-        
-        // localStorageからBGM設定を読み込む
-        const savedBGM = localStorage.getItem('bgmEnabled');
-        this.bgmEnabled = savedBGM === null ? true : savedBGM === 'true';
-        
-        // BGMトグルのイベントリスナー
-        const bgmToggle = document.getElementById('bgm-toggle');
-        if (bgmToggle) {
-            bgmToggle.addEventListener('change', (e) => {
-                this.setBGMEnabled(e.target.checked);
-            });
-        }
-        
-        // ユーザーの最初のクリックでBGMを開始
-        const startBGM = () => {
-            if (this.bgmEnabled) {
-                this.playBGM();
-            }
-            document.removeEventListener('click', startBGM);
-            document.removeEventListener('touchend', startBGM);
-        };
-        
-        document.addEventListener('click', startBGM, { once: true });
-        document.addEventListener('touchend', startBGM, { once: true });
-        
-        // アプリがバックグラウンドに移行した時の処理
-        document.addEventListener('visibilitychange', () => {
-            if (document.hidden) {
-                // バックグラウンドに移行：BGMを一時停止
-                if (this.bgmAudio && !this.bgmAudio.paused) {
-                    this.bgmAudio.pause();
-                }
-            } else {
-                // フォアグラウンドに復帰：BGMを再開
-                if (this.bgmEnabled && this.bgmAudio && this.bgmAudio.paused) {
-                    this.bgmAudio.play().catch(err => {
-                        console.log('BGM再開エラー:', err);
-                    });
-                }
-            }
-        });
-        
-        // iOSのpause/resumeイベントにも対応
-        window.addEventListener('blur', () => {
-            if (this.bgmAudio && !this.bgmAudio.paused) {
-                this.bgmAudio.pause();
-            }
-        });
-        
-        window.addEventListener('focus', () => {
-            if (this.bgmEnabled && this.bgmAudio && this.bgmAudio.paused) {
-                this.bgmAudio.play().catch(err => {
-                    console.log('BGM再開エラー:', err);
-                });
-            }
-        });
-    }
-    
-    // BGMの有効/無効を取得
-    getBGMEnabled() {
-        return this.bgmEnabled;
-    }
-    
-    // BGMの有効/無効を設定
-    setBGMEnabled(enabled) {
-        this.bgmEnabled = enabled;
-        localStorage.setItem('bgmEnabled', enabled);
-        
-        if (enabled) {
-            this.playBGM();
-        } else {
-            this.stopBGM();
-        }
-    }
-    
-    // BGMを再生
-    playBGM() {
-        if (this.bgmEnabled && this.bgmAudio) {
-            const playPromise = this.bgmAudio.play();
-            if (playPromise !== undefined) {
-                playPromise.then(() => {
-                    console.log('BGM再生開始');
-                }).catch(err => {
-                    console.log('BGM再生エラー:', err);
-                    // 自動再生がブロックされた場合、次のユーザー操作で再試行
-                    const retryPlay = () => {
-                        this.playBGM();
-                        document.removeEventListener('click', retryPlay);
-                        document.removeEventListener('touchend', retryPlay);
-                    };
-                    document.addEventListener('click', retryPlay, { once: true });
-                    document.addEventListener('touchend', retryPlay, { once: true });
-                });
-            }
-        }
-    }
-    
-    // BGMを停止
-    stopBGM() {
-        if (this.bgmAudio) {
-            this.bgmAudio.pause();
-            this.bgmAudio.currentTime = 0;
-        }
     }
     
     init() {
