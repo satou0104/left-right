@@ -482,19 +482,27 @@ class FallingGame {
             let newDelay;
             
             if (this.score >= 200) {
-                newDelay = 150; // レベル10: 0.15秒
+                newDelay = 150; // 0.15秒
             } else if (this.score >= 180) {
-                newDelay = 200; // レベル9: 0.2秒
+                newDelay = 200; // 0.2秒
             } else if (this.score >= 160) {
-                newDelay = 250; // レベル8: 0.25秒
+                newDelay = 250; // 0.25秒
             } else if (this.score >= 140) {
-                newDelay = 300; // レベル7: 0.3秒
+                newDelay = 300; // 0.3秒
             } else if (this.score >= 120) {
-                newDelay = 400; // レベル6: 0.4秒
+                newDelay = 400; // 0.4秒
             } else if (this.score >= 100) {
-                newDelay = 500; // レベル5: 0.5秒
+                newDelay = 500; // 0.5秒
+            } else if (this.score >= 80) {
+                newDelay = 520; // 0.52秒
+            } else if (this.score >= 60) {
+                newDelay = 540; // 0.54秒
+            } else if (this.score >= 40) {
+                newDelay = 560; // 0.56秒
+            } else if (this.score >= 20) {
+                newDelay = 580; // 0.58秒
             } else {
-                newDelay = Math.max(500 - (level * 50), 500); // 0-99点は0.5秒固定
+                newDelay = 600; // 0.6秒
             }
             
             if (newDelay !== this.spawnDelay) {
@@ -666,7 +674,8 @@ class FallingGame {
             this.updateScore();
             
             // レベルアップ時の音
-            if (Math.floor(this.score / 20) > Math.floor(previousScore / 20)) {
+            const interval = this.isSuperHardMode ? 30 : 20;
+            if (Math.floor(this.score / interval) > Math.floor(previousScore / interval)) {
                 this.playLevelUpSound();
             }
             
