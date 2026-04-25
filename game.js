@@ -29,19 +29,10 @@ class FallingGame {
     
     // スーパーハードのアンロック状態をチェック
     checkSuperHardUnlock() {
-        const hardScores = this.getHighScores('hard');
-        const hasUnlocked = hardScores.some(score => score.score >= 140);
-        
         const superHardBtn = document.getElementById('start-super-hard-btn');
         const superHardTab = document.getElementById('superhard-tab');
-        
-        if (hasUnlocked) {
-            superHardBtn.classList.remove('hidden');
-            superHardTab.classList.remove('hidden');
-        } else {
-            superHardBtn.classList.add('hidden');
-            superHardTab.classList.add('hidden');
-        }
+        superHardBtn.classList.remove('hidden');
+        superHardTab.classList.remove('hidden');
     }
     
     // Web Audio APIの初期化
