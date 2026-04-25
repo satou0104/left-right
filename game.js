@@ -446,27 +446,27 @@ class FallingGame {
     updateSpawnRate() {
         if (this.isSuperHardMode) {
             // スーパーハードモード: レベル7スタート
-            const level = Math.floor(this.score / 20) + 7; // レベル7から開始
+            const level = Math.floor(this.score / 30) + 7; // レベル7から開始
             let newDelay;
             
-            if (this.score >= 180) {
-                newDelay = 50; // レベル15: 0.05秒
+            if (this.score >= 250) {
+                newDelay = 50; // 0.05秒
+            } else if (this.score >= 220) {
+                newDelay = 70; // 0.07秒
+            } else if (this.score >= 190) {
+                newDelay = 90; // 0.09秒
             } else if (this.score >= 160) {
-                newDelay = 70; // レベル14: 0.07秒
-            } else if (this.score >= 140) {
-                newDelay = 90; // レベル13: 0.09秒
-            } else if (this.score >= 120) {
-                newDelay = 110; // レベル12: 0.11秒
+                newDelay = 110; // 0.11秒
+            } else if (this.score >= 130) {
+                newDelay = 130; // 0.13秒
             } else if (this.score >= 100) {
-                newDelay = 130; // レベル11: 0.13秒
-            } else if (this.score >= 80) {
-                newDelay = 150; // レベル10: 0.15秒
-            } else if (this.score >= 60) {
-                newDelay = 200; // レベル9: 0.2秒
+                newDelay = 150; // 0.15秒
+            } else if (this.score >= 70) {
+                newDelay = 200; // 0.2秒
             } else if (this.score >= 40) {
-                newDelay = 250; // レベル8: 0.25秒
+                newDelay = 250; // 0.25秒
             } else {
-                newDelay = 300; // レベル7: 0.3秒
+                newDelay = 300; // 0.3秒
             }
             
             if (newDelay !== this.spawnDelay) {
