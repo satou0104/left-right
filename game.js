@@ -1165,7 +1165,7 @@ class FallingGame {
     updateRankingTitle() {
         const today = this.getTodayDate();
         const displayDate = this.formatDateForDisplay(today);
-        document.getElementById('ranking-title').textContent = `ランキング（${displayDate}）`;
+        document.getElementById('ranking-title').innerHTML = `ランキング<br>（${displayDate}）`;
     }
     
     async submitScoreToFirebase(nickname, score) {
