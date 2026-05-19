@@ -181,7 +181,7 @@ class FallingGame {
     loadCredits() {
         // 最後にクレジットを保存した日付を取得
         const lastDate = localStorage.getItem('lastCreditDate');
-        const today = this.getTodayDate();
+        const today = this.getTodayDateFull();
         
         // 日付が変わっていたらクレジットをリセット
         if (lastDate !== today) {
@@ -198,7 +198,7 @@ class FallingGame {
     saveCredits() {
         localStorage.setItem('gameCredits', this.credits.toString());
         // 保存時に日付も更新
-        localStorage.setItem('lastCreditDate', this.getTodayDate());
+        localStorage.setItem('lastCreditDate', this.getTodayDateFull());
     }
     
     // クレジット表示を更新
@@ -1138,8 +1138,16 @@ class FallingGame {
     }
     
     // スコアをFirebaseに送信
-    // 今日の日付を取得（YYYY-MM-DD形式）
+    // 今月の年月を取得（YYYY-MM形式）ランキング用
     getTodayDate() {
+        const now = new Date();
+        const year = now.getFullYear();
+        const month = String(now.getMonth() + 1).padStart(2, '0');
+        return `${year}-${month}`;
+    }
+    
+    // 今日の日付を取得（YYYY-MM-DD形式）クレジット用
+    getTodayDateFull() {
         const now = new Date();
         const year = now.getFullYear();
         const month = String(now.getMonth() + 1).padStart(2, '0');
@@ -1147,9 +1155,10 @@ class FallingGame {
         return `${year}-${month}-${day}`;
     }
     
-    // 日付を表示用にフォーマット（YYYY/MM/DD形式）
+    // 日付を表示用にフォーマット（YYYY年MM月形式）
     formatDateForDisplay(dateStr) {
-        return dateStr.replace(/-/g, '/');
+        const parts = dateStr.split('-');
+        return `${parts[0]}年${parts[1]}月`;
     }
     
     // ランキングタイトルを更新

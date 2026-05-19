@@ -1,6 +1,6 @@
 {
   "name": "sayuurakka",
-  "version": "1.3.0",
+  "version": "1.4.0",
   "description": "左右落下ゲーム",
   "main": "index.html",
   "scripts": {
