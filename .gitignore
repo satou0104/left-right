@@ -26,3 +26,6 @@ npm-debug.log*
 *.certSigningRequest
 *.cer
 *.mobileprovision
+
+# 開発ドキュメント（内部用）
+ios-app-development.md
