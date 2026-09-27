@@ -19,12 +19,18 @@ class FallingGame {
         this.currentRankingTab = 'local'; // ランキングタブ（local/global）
         this.audioContext = null; // Web Audio API用
         this.credits = this.loadCredits(); // クレジット数
+        this.consecutiveClear = 0; // 連続クリア回数
+        
+        // 麻雀牌コレクション
+        this.collection = this.loadCollection();
+        this.lastRewardMonth = localStorage.getItem('lastRewardMonth') || '';
         
         this.init();
         this.initScreenNavigation();
         this.checkSuperHardUnlock();
         this.initRankingName(); // ランキング名の初期化
         this.updateCreditDisplay(); // クレジット表示を更新
+        this.checkMonthlyReward(); // 月次報酬チェック
     }
     
     // スーパーハードのアンロック状態をチェック
@@ -186,12 +192,12 @@ class FallingGame {
         // 日付が変わっていたらクレジットをリセット
         if (lastDate !== today) {
             localStorage.setItem('lastCreditDate', today);
-            localStorage.setItem('gameCredits', '10');
-            return 10;
+            localStorage.setItem('gameCredits', '6'); // v2.0.0: 10→6に変更
+            return 6;
         }
         
         const saved = localStorage.getItem('gameCredits');
-        return saved ? parseInt(saved) : 10;
+        return saved ? parseInt(saved) : 6; // v2.0.0: 10→6に変更
     }
     
     // クレジットを保存
@@ -219,7 +225,7 @@ class FallingGame {
     
     // クレジットを回復（広告視聴後）
     restoreCredits() {
-        this.credits = 10;
+        this.credits = 6; // v2.0.0: 10→6に変更
         this.saveCredits();
         this.updateCreditDisplay();
     }
@@ -780,6 +786,18 @@ class FallingGame {
             this.loadRankingName();
         });
         
+        // v2.0.0: コレクションボタン
+        const collectionBtn = document.getElementById('collection-btn');
+        collectionBtn.addEventListener('click', () => {
+            this.showScreen('collection-screen');
+            this.displayCollection();
+        });
+        collectionBtn.addEventListener('touchend', (e) => {
+            e.preventDefault();
+            this.showScreen('collection-screen');
+            this.displayCollection();
+        });
+        
         // 設定のトグルスイッチ
         const soundToggle = document.getElementById('sound-toggle');
         soundToggle.addEventListener('change', (e) => {
@@ -875,6 +893,16 @@ class FallingGame {
             this.showScreen('main-menu');
         });
         backFromHighscoreBtn.addEventListener('touchend', (e) => {
+            e.preventDefault();
+            this.showScreen('main-menu');
+        });
+        
+        // v2.0.0: コレクション画面の戻るボタン
+        const backFromCollectionBtn = document.getElementById('back-from-collection-btn');
+        backFromCollectionBtn.addEventListener('click', () => {
+            this.showScreen('main-menu');
+        });
+        backFromCollectionBtn.addEventListener('touchend', (e) => {
             e.preventDefault();
             this.showScreen('main-menu');
         });
@@ -996,6 +1024,154 @@ class FallingGame {
         // Firebaseに自動送信
         const nickname = this.getRankingName();
         this.submitScoreToFirebase(nickname, this.score);
+        
+        // v2.0.0: プレイ回数をカウントしてアプリレビュー依頼
+        this.incrementPlayCountAndRequestReview();
+    }
+    
+    // v2.0.0: プレイ回数をカウントしてレビュー依頼
+    incrementPlayCountAndRequestReview() {
+        // プレイ回数を取得
+        let playCount = parseInt(localStorage.getItem('totalPlayCount') || '0');
+        playCount++;
+        localStorage.setItem('totalPlayCount', playCount.toString());
+        
+        // レビュー依頼済みフラグを確認
+        const hasRequestedReview = localStorage.getItem('hasRequestedReview') === 'true';
+        
+        // 5回目のプレイかつ未依頼の場合、レビューを依頼
+        if (playCount === 5 && !hasRequestedReview) {
+            setTimeout(() => {
+                this.requestAppReview();
+            }, 2000); // ゲームオーバー表示の後に表示
+        }
+    }
+    
+    // v2.0.0: アプリレビュー依頼
+    async requestAppReview() {
+        try {
+            // Capacitorプラグインが利用可能かチェック
+            if (typeof window.Capacitor !== 'undefined' && window.Capacitor.Plugins) {
+                const { App } = window.Capacitor.Plugins;
+                
+                // iOS/Androidでネイティブレビューを試みる
+                if (App && App.requestReview) {
+                    // Capacitor 6.0以降のネイティブレビュー機能
+                    await App.requestReview();
+                    localStorage.setItem('hasRequestedReview', 'true');
+                    // レビュー表示時に広告回数をリセット
+                    this.restoreCredits();
+                    return;
+                } else if (window.Capacitor.Plugins.RateApp) {
+                    // 代替: capacitor-rate-appプラグインを使用
+                    await window.Capacitor.Plugins.RateApp.requestReview();
+                    localStorage.setItem('hasRequestedReview', 'true');
+                    this.restoreCredits();
+                    return;
+                }
+            }
+            
+            // プラグインが利用できない場合はカスタムダイアログを表示
+            this.showCustomReviewDialog();
+            
+        } catch (error) {
+            console.error('レビュー依頼エラー:', error);
+            // エラー時もカスタムダイアログを表示
+            this.showCustomReviewDialog();
+        }
+    }
+    
+    // v2.0.0: カスタムレビューダイアログを表示
+    showCustomReviewDialog() {
+        const overlay = document.createElement('div');
+        overlay.style.cssText = `
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 99999;
+            animation: fadeIn 0.3s ease-out;
+        `;
+        
+        const popup = document.createElement('div');
+        popup.style.cssText = `
+            background: rgba(0, 0, 0, 0.95);
+            border: 2px solid #00ffff;
+            border-radius: 12px;
+            padding: 30px;
+            text-align: center;
+            max-width: 350px;
+            box-shadow: 0 0 30px rgba(0, 255, 255, 0.5);
+            animation: slideUp 0.3s ease-out;
+        `;
+        
+        popup.innerHTML = `
+            <div style="font-size: 40px; margin-bottom: 15px;">⭐️</div>
+            <h2 style="color: #00ffff; font-size: 24px; margin-bottom: 20px; text-shadow: 0 0 10px #00ffff;">アプリを楽しんでいただけていますか?</h2>
+            <p style="color: #ffffff; font-size: 16px; margin-bottom: 25px; line-height: 1.6;">
+                よろしければApp Storeでレビューをお願いします！<br>
+                あなたの評価がアプリの改善に役立ちます。
+            </p>
+            <button id="review-yes-btn" style="
+                width: 100%;
+                padding: 15px;
+                font-size: 18px;
+                font-weight: 700;
+                background: #00ffff;
+                color: #000;
+                border: none;
+                border-radius: 8px;
+                cursor: pointer;
+                margin-bottom: 10px;
+                transition: all 0.3s;
+            ">レビューを書く</button>
+            <button id="review-later-btn" style="
+                width: 100%;
+                padding: 15px;
+                font-size: 16px;
+                font-weight: 700;
+                background: transparent;
+                color: #ffffff;
+                border: 2px solid #666;
+                border-radius: 8px;
+                cursor: pointer;
+                transition: all 0.3s;
+            ">後で</button>
+        `;
+        
+        overlay.appendChild(popup);
+        document.body.appendChild(overlay);
+        
+        // レビューを書くボタン
+        document.getElementById('review-yes-btn').addEventListener('click', () => {
+            document.body.removeChild(overlay);
+            localStorage.setItem('hasRequestedReview', 'true');
+            this.restoreCredits(); // 広告回数をリセット
+            
+            // App Storeのレビューページを開く
+            // 実際のアプリIDに置き換えてください
+            const appId = 'YOUR_APP_ID'; // App Store Connect で確認できるID
+            const reviewUrl = `https://apps.apple.com/app/id${appId}?action=write-review`;
+            
+            if (window.Capacitor && window.Capacitor.Plugins.Browser) {
+                // Capacitorのブラウザプラグインで開く
+                window.Capacitor.Plugins.Browser.open({ url: reviewUrl });
+            } else {
+                // 通常のブラウザで開く
+                window.open(reviewUrl, '_blank');
+            }
+        });
+        
+        // 後でボタン
+        document.getElementById('review-later-btn').addEventListener('click', () => {
+            document.body.removeChild(overlay);
+            // 後でを選んだ場合は、次回また依頼できるようにフラグは立てない
+        });
     }
     
     saveHighScore(score) {
@@ -1187,6 +1363,294 @@ class FallingGame {
             console.error('スコア送信エラー:', error);
             return false;
         }
+    }
+    
+    // v2.0.0: 麻雀牌コレクション関連
+    
+    // 麻雀牌の定義（全34種類）
+    getAllTiles() {
+        return {
+            manzu: ['1man', '2man', '3man', '4man', '5man', '6man', '7man', '8man', '9man'],
+            pinzu: ['1pin', '2pin', '3pin', '4pin', '5pin', '6pin', '7pin', '8pin', '9pin'],
+            sozu: ['1so', '2so', '3so', '4so', '5so', '6so', '7so', '8so', '9so'],
+            zihai: ['ton', 'nan', 'sya', 'pei', 'haku', 'hatu', 'tyun']
+        };
+    }
+    
+    // コレクションを読み込む
+    loadCollection() {
+        const saved = localStorage.getItem('mahjongCollection');
+        return saved ? JSON.parse(saved) : [];
+    }
+    
+    // コレクションを保存
+    saveCollection() {
+        localStorage.setItem('mahjongCollection', JSON.stringify(this.collection));
+    }
+    
+    // 麻雀牌を追加
+    addTilesToCollection(tiles) {
+        const newTiles = [];
+        tiles.forEach(tile => {
+            if (!this.collection.includes(tile)) {
+                this.collection.push(tile);
+                newTiles.push(tile);
+            }
+        });
+        
+        if (newTiles.length > 0) {
+            this.saveCollection();
+        }
+        
+        return newTiles;
+    }
+    
+    // ランダムに未獲得の麻雀牌を取得
+    getRandomUnownedTiles(count) {
+        const allTiles = this.getAllTiles();
+        const allTilesList = [
+            ...allTiles.manzu,
+            ...allTiles.pinzu,
+            ...allTiles.sozu,
+            ...allTiles.zihai
+        ];
+        
+        // 未獲得の牌をフィルタ
+        const unownedTiles = allTilesList.filter(tile => !this.collection.includes(tile));
+        
+        if (unownedTiles.length === 0) {
+            return []; // 全て獲得済み
+        }
+        
+        // ランダムに選択（重複なし）
+        const result = [];
+        const available = [...unownedTiles];
+        const selectCount = Math.min(count, available.length);
+        
+        for (let i = 0; i < selectCount; i++) {
+            const randomIndex = Math.floor(Math.random() * available.length);
+            result.push(available[randomIndex]);
+            available.splice(randomIndex, 1);
+        }
+        
+        return result;
+    }
+    
+    // 月次報酬をチェック
+    async checkMonthlyReward() {
+        const currentMonth = this.getTodayDate(); // YYYY-MM形式
+        
+        // 既に今月の報酬を受け取っている場合はスキップ
+        if (this.lastRewardMonth === currentMonth) {
+            return;
+        }
+        
+        // 前月のランキングデータを取得
+        const lastMonth = this.getPreviousMonth(currentMonth);
+        
+        try {
+            // スーパーハードのランキングのみチェック
+            const dbRef = window.firebaseRef(window.firebaseDB, `rankings/superhard/${lastMonth}`);
+            const rankingQuery = window.firebaseQuery(
+                dbRef,
+                window.firebaseOrderByChild('score'),
+                window.firebaseLimitToLast(100)
+            );
+            
+            const snapshot = await window.firebaseGet(rankingQuery);
+            
+            if (!snapshot.exists()) {
+                return; // ランキングデータなし
+            }
+            
+            // ランキングデータを配列に変換
+            const rankings = [];
+            snapshot.forEach((childSnapshot) => {
+                rankings.push({
+                    ...childSnapshot.val(),
+                    id: childSnapshot.key
+                });
+            });
+            
+            // スコアで降順ソート
+            rankings.sort((a, b) => b.score - a.score);
+            
+            // 自分のニックネームと照合
+            const myNickname = this.getRankingName();
+            const myRank = rankings.findIndex(r => r.nickname === myNickname);
+            
+            if (myRank === -1) {
+                return; // ランキングに参加していない
+            }
+            
+            // 順位に応じて報酬を決定
+            let rewardCount = 0;
+            if (myRank === 0) {
+                rewardCount = 5; // 1位
+            } else if (myRank === 1) {
+                rewardCount = 4; // 2位
+            } else if (myRank === 2) {
+                rewardCount = 3; // 3位
+            } else {
+                rewardCount = 1; // 参加賞
+            }
+            
+            // 未獲得の麻雀牌をランダムに選択
+            const newTiles = this.getRandomUnownedTiles(rewardCount);
+            
+            if (newTiles.length > 0) {
+                // 獲得処理
+                this.addTilesToCollection(newTiles);
+                
+                // 報酬受け取り済みフラグを更新
+                this.lastRewardMonth = currentMonth;
+                localStorage.setItem('lastRewardMonth', currentMonth);
+                
+                // 獲得ポップアップを表示
+                this.showTileRewardPopup(newTiles, myRank + 1);
+            }
+            
+        } catch (error) {
+            console.error('月次報酬チェックエラー:', error);
+        }
+    }
+    
+    // 前月の年月を取得（YYYY-MM形式）
+    getPreviousMonth(currentMonth) {
+        const [year, month] = currentMonth.split('-').map(Number);
+        const date = new Date(year, month - 1, 1);
+        date.setMonth(date.getMonth() - 1);
+        const prevYear = date.getFullYear();
+        const prevMonth = String(date.getMonth() + 1).padStart(2, '0');
+        return `${prevYear}-${prevMonth}`;
+    }
+    
+    // 獲得ポップアップを表示
+    showTileRewardPopup(tiles, rank) {
+        const overlay = document.createElement('div');
+        overlay.style.cssText = `
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 99999;
+        `;
+        
+        const popup = document.createElement('div');
+        popup.style.cssText = `
+            background: rgba(0, 0, 0, 0.95);
+            border: 2px solid #ffd700;
+            border-radius: 12px;
+            padding: 30px;
+            text-align: center;
+            max-width: 400px;
+            box-shadow: 0 0 30px rgba(255, 215, 0, 0.5);
+        `;
+        
+        let rankText = '';
+        if (rank === 1) {
+            rankText = '🥇 1位おめでとうございます！';
+        } else if (rank === 2) {
+            rankText = '🥈 2位おめでとうございます！';
+        } else if (rank === 3) {
+            rankText = '🥉 3位おめでとうございます！';
+        } else {
+            rankText = '🎉 参加ありがとうございます！';
+        }
+        
+        // 獲得した牌の画像HTML
+        let tilesHTML = tiles.map(tile => {
+            const folder = this.getTileFolder(tile);
+            return `<img src="${folder}/${tile}.png" style="width: 60px; height: 80px; margin: 5px; border: 2px solid #ffd700; border-radius: 4px;">`;
+        }).join('');
+        
+        // 全種コンプリートチェック
+        const allTiles = this.getAllTiles();
+        const totalTiles = allTiles.manzu.length + allTiles.pinzu.length + allTiles.sozu.length + allTiles.zihai.length;
+        const isComplete = this.collection.length === totalTiles;
+        
+        popup.innerHTML = `
+            <h2 style="color: #ffd700; font-size: 24px; margin-bottom: 20px; text-shadow: 0 0 10px #ffd700;">${rankText}</h2>
+            <p style="color: #ffffff; font-size: 18px; margin-bottom: 20px;">以下の麻雀牌を手に入れました！</p>
+            <div style="display: flex; flex-wrap: wrap; justify-content: center; margin-bottom: 20px;">
+                ${tilesHTML}
+            </div>
+            ${isComplete ? '<p style="color: #ffd700; font-size: 20px; font-weight: 700; margin-bottom: 20px;">🎊 全種コンプリートおめでとう！ 🎊</p>' : ''}
+            <button id="close-reward-btn" style="
+                width: 100%;
+                padding: 15px;
+                font-size: 18px;
+                font-weight: 700;
+                background: #ffd700;
+                color: #000;
+                border: none;
+                border-radius: 8px;
+                cursor: pointer;
+                transition: all 0.3s;
+            ">OK</button>
+        `;
+        
+        overlay.appendChild(popup);
+        document.body.appendChild(overlay);
+        
+        document.getElementById('close-reward-btn').addEventListener('click', () => {
+            document.body.removeChild(overlay);
+        });
+    }
+    
+    // 麻雀牌のフォルダパスを取得
+    getTileFolder(tile) {
+        if (tile.includes('man')) return 'manzu';
+        if (tile.includes('pin')) return 'pinzu';
+        if (tile.includes('so')) return 'so-zu';
+        return 'zihai';
+    }
+    
+    // コレクション画面を表示
+    displayCollection() {
+        const allTiles = this.getAllTiles();
+        
+        // 萬子
+        this.renderTileGrid('manzu-collection', allTiles.manzu, 'manzu');
+        
+        // 筒子
+        this.renderTileGrid('pinzu-collection', allTiles.pinzu, 'pinzu');
+        
+        // 索子
+        this.renderTileGrid('sozu-collection', allTiles.sozu, 'so-zu');
+        
+        // 字牌
+        this.renderTileGrid('zihai-collection', allTiles.zihai, 'zihai');
+        
+        // 獲得数を更新
+        document.getElementById('collection-count').textContent = this.collection.length;
+    }
+    
+    // 麻雀牌グリッドをレンダリング
+    renderTileGrid(containerId, tiles, folder) {
+        const container = document.getElementById(containerId);
+        container.innerHTML = '';
+        
+        tiles.forEach(tile => {
+            const tileDiv = document.createElement('div');
+            tileDiv.className = 'tile-item';
+            
+            if (this.collection.includes(tile)) {
+                // 獲得済み
+                tileDiv.innerHTML = `<img src="${folder}/${tile}.png" alt="${tile}">`;
+            } else {
+                // 未獲得（？で表示）
+                tileDiv.innerHTML = '<div class="tile-unknown">？</div>';
+                tileDiv.classList.add('unknown');
+            }
+            
+            container.appendChild(tileDiv);
+        });
     }
 }
 

@@ -13,7 +13,7 @@
             <h1 class="game-title">左右落下</h1>
             <p class="game-subtitle">瞬間判断力ゲーム</p>
             <button id="title-start-btn" class="title-start-btn">スタート</button>
-            <p class="version-text">v1.4.0</p>
+            <p class="version-text">v2.0.0</p>
         </div>
     </div>
 
@@ -27,9 +27,40 @@
                 <button id="start-hard-btn" class="menu-btn hard-btn">ハード</button>
                 <button id="start-super-hard-btn" class="menu-btn super-hard-btn">スーパーハード</button>
                 <button id="highscore-btn" class="menu-btn">ランキング</button>
+                <button id="collection-btn" class="menu-btn">コレクション</button>
                 <button id="instructions-btn" class="menu-btn">操作説明</button>
                 <button id="settings-btn" class="menu-btn">設定</button>
             </div>
+        </div>
+    </div>
+
+    <!-- コレクション画面 -->
+    <div id="collection-screen" class="screen hidden">
+        <div id="collection-container">
+            <h2>麻雀牌コレクション</h2>
+            <p class="collection-count">獲得数: <span id="collection-count">0</span> / 34</p>
+            
+            <div class="collection-section">
+                <h3>萬子（マンズ）</h3>
+                <div id="manzu-collection" class="tile-grid"></div>
+            </div>
+            
+            <div class="collection-section">
+                <h3>筒子（ピンズ）</h3>
+                <div id="pinzu-collection" class="tile-grid"></div>
+            </div>
+            
+            <div class="collection-section">
+                <h3>索子（ソーズ）</h3>
+                <div id="sozu-collection" class="tile-grid"></div>
+            </div>
+            
+            <div class="collection-section">
+                <h3>字牌（ジハイ）</h3>
+                <div id="zihai-collection" class="tile-grid"></div>
+            </div>
+            
+            <button id="back-from-collection-btn" class="back-btn">戻る</button>
         </div>
     </div>
 
