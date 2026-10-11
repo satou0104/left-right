@@ -1222,8 +1222,24 @@ input:checked + .toggle-slider:before {
 #collection-container h2 {
     color: #00ffff;
     text-shadow: 0 0 10px #00ffff;
-    margin-bottom: 20px;
+    margin-bottom: 15px;
     text-align: center;
+}
+
+.collection-info {
+    text-align: center;
+    font-size: 16px;
+    margin-bottom: 8px;
+    color: #ffffff;
+    line-height: 1.5;
+}
+
+.collection-reward {
+    text-align: center;
+    font-size: 14px;
+    margin-bottom: 15px;
+    color: #ffd700;
+    font-weight: 600;
 }
 
 .collection-count {
