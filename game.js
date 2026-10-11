@@ -1881,7 +1881,7 @@ class FallingGame {
         `;
         
         popup.innerHTML = `
-            <div style="display: flex; gap: 20px; align-items: flex-start;">
+            <div style="display: flex; gap: 20px; align-items: center;">
                 <div style="flex-shrink: 0;">
                     <img src="${folder}/${tile}.png" style="width: 100px; height: 133px; border: 2px solid #00ffff; border-radius: 4px;">
                 </div>
