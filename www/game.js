@@ -25,12 +25,32 @@ class FallingGame {
         this.collection = this.loadCollection();
         this.lastRewardMonth = localStorage.getItem('lastRewardMonth') || '';
         
+        // 🔧 DEBUG: テスト用に各種類5個ずつ追加（後で削除）
+        this.addDebugTiles();
+        
         this.init();
         this.initScreenNavigation();
         this.checkSuperHardUnlock();
         this.initRankingName(); // ランキング名の初期化
         this.updateCreditDisplay(); // クレジット表示を更新
         this.checkMonthlyReward(); // 月次報酬チェック
+    }
+    
+    // 🔧 DEBUG: テスト用の麻雀牌追加関数（後で削除）
+    addDebugTiles() {
+        const testTiles = [
+            // 萬子から5個
+            '1man', '2man', '3man', '4man', '5man',
+            // 筒子から5個
+            '1pin', '2pin', '3pin', '4pin', '5pin',
+            // 索子から5個
+            '1so', '2so', '3so', '4so', '5so',
+            // 字牌から5個
+            'ton', 'nan', 'sya', 'pei', 'haku'
+        ];
+        
+        this.collection = testTiles;
+        this.saveCollection();
     }
     
     // スーパーハードのアンロック状態をチェック
@@ -1111,7 +1131,6 @@ class FallingGame {
         `;
         
         popup.innerHTML = `
-            <div style="font-size: 40px; margin-bottom: 15px;">⭐️</div>
             <h2 style="color: #00ffff; font-size: 24px; margin-bottom: 20px; text-shadow: 0 0 10px #00ffff;">アプリを楽しんでいただけていますか?</h2>
             <p style="color: #ffffff; font-size: 16px; margin-bottom: 25px; line-height: 1.6;">
                 よろしければApp Storeでレビューをお願いします！<br>
@@ -1172,6 +1191,12 @@ class FallingGame {
             document.body.removeChild(overlay);
             // 後でを選んだ場合は、次回また依頼できるようにフラグは立てない
         });
+    }
+    
+    // 🔧 DEBUG: 1位報酬ポップアップのテスト関数（後で削除）
+    testFirstPlaceReward() {
+        const testTiles = this.getRandomUnownedTiles(5);
+        this.showTileRewardPopup(testTiles, 1);
     }
     
     saveHighScore(score) {
@@ -1554,13 +1579,13 @@ class FallingGame {
         
         let rankText = '';
         if (rank === 1) {
-            rankText = '🥇 1位おめでとうございます！';
+            rankText = '1位おめでとうございます！';
         } else if (rank === 2) {
-            rankText = '🥈 2位おめでとうございます！';
+            rankText = '2位おめでとうございます！';
         } else if (rank === 3) {
-            rankText = '🥉 3位おめでとうございます！';
+            rankText = '3位おめでとうございます！';
         } else {
-            rankText = '🎉 参加ありがとうございます！';
+            rankText = '参加ありがとうございます！';
         }
         
         // 獲得した牌の画像HTML
@@ -1580,7 +1605,7 @@ class FallingGame {
             <div style="display: flex; flex-wrap: wrap; justify-content: center; margin-bottom: 20px;">
                 ${tilesHTML}
             </div>
-            ${isComplete ? '<p style="color: #ffd700; font-size: 20px; font-weight: 700; margin-bottom: 20px;">🎊 全種コンプリートおめでとう！ 🎊</p>' : ''}
+            ${isComplete ? '<p style="color: #ffd700; font-size: 20px; font-weight: 700; margin-bottom: 20px;">全種コンプリートおめでとう！</p>' : ''}
             <button id="close-reward-btn" style="
                 width: 100%;
                 padding: 15px;
