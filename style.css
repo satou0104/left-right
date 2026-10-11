@@ -1246,7 +1246,13 @@ input:checked + .toggle-slider:before {
     text-align: center;
     font-size: 18px;
     margin-bottom: 30px;
+    color: #ffffff;
+}
+
+.collection-count-number {
     color: #ffd700;
+    font-weight: 700;
+    font-size: 20px;
 }
 
 .collection-section {
