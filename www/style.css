@@ -1281,9 +1281,17 @@ input:checked + .toggle-slider:before {
     transition: transform 0.2s, box-shadow 0.2s;
 }
 
-.tile-item:hover {
+.tile-item:not(.unknown) {
+    cursor: pointer;
+}
+
+.tile-item:not(.unknown):hover {
     transform: scale(1.05);
     box-shadow: 0 0 15px rgba(0, 255, 255, 0.5);
+}
+
+.tile-item:not(.unknown):active {
+    transform: scale(0.98);
 }
 
 .tile-item img {

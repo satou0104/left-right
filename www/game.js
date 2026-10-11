@@ -1523,6 +1523,51 @@ class FallingGame {
         };
     }
     
+    // 麻雀牌の説明データ
+    getTileDescription(tile) {
+        const descriptions = {
+            '1man': { name: '一萬', text: '「どうせ最初に捨てるんでしょ？」\n「……え、まだ持っててくれるの？」' },
+            '2man': { name: '二萬', text: '「一萬ほど地味じゃないし、三萬ほど人気でもない。」\n「なんか、ずっと二番手なんだよね。」' },
+            '3man': { name: '三萬', text: '「最近ちょっと調子いいんだよね。」\n「根拠？ ないけど。」' },
+            '4man': { name: '四萬', text: '「まあ、なんとかなるっしょ。」\n「その考えでここまで来ました。」' },
+            '5man': { name: '五萬', text: '「今日は赤くないけど、気持ちは赤ドラ。」\n「自信だけは満点です。」' },
+            '6man': { name: '六萬', text: '「気づいたらいい位置にいる。」\n「そういう人、クラスに一人はいるよね。」' },
+            '7man': { name: '七萬', text: '「ラッキーセブンって呼んでもいいよ。」\n「呼ぶだけなら無料だからさ。」' },
+            '8man': { name: '八萬', text: '「末広がりって、いい言葉だよね。」\n「僕の将来も末広がりだといいな。」' },
+            '9man': { name: '九萬', text: '「もうすぐゴールだと思ってた。」\n「でも麻雀にゴールなんてなかった。」' },
+            
+            '1pin': { name: '一筒', text: '「丸いものを見ると落ち着くんだよね。」\n「たぶん前世はお団子。」' },
+            '2pin': { name: '二筒', text: '「友達はいるけど、親友はいない。」\n「一筒と三筒、どっちとも仲いいからね。」' },
+            '3pin': { name: '三筒', text: '「今日こそ主役になってやる。」\n「とりあえず、隣の牌から誘ってみよう。」' },
+            '4pin': { name: '四筒', text: '「丸が四つ。なんか縁起が悪い？」\n「いやいや、考えすぎだって！」' },
+            '5pin': { name: '五筒', text: '「赤いやつばっかりチヤホヤされてさ。」\n「通常版にも愛をください。」' },
+            '6pin': { name: '六筒', text: '「そろそろ出番かな？」\n「って思い続けて、もう半荘終わった。」' },
+            '7pin': { name: '七筒', text: '「七ってなんか特別感あるよね。」\n「僕が言うと説得力ない？」' },
+            '8pin': { name: '八筒', text: '「丸がいっぱいでしょ？」\n「数えるのはやめとこう。眠くなるから。」' },
+            '9pin': { name: '九筒', text: '「僕を見てると目がチカチカする？」\n「それは恋かもしれません。」' },
+            
+            '1so': { name: '一索', text: '「鳥みたいってよく言われる。」\n「でも飛べないんだよね、僕。」' },
+            '2so': { name: '二索', text: '「竹って涼しそうでいいよね。」\n「夏場は僕を見て涼んでください。」' },
+            '3so': { name: '三索', text: '「そろそろ本気出すか。」\n「そのセリフ、今月で三回目です。」' },
+            '4so': { name: '四索', text: '「四ってちょっと不吉？」\n「麻雀では普通に使ってもらえるからセーフ。」' },
+            '5so': { name: '五索', text: '「赤くなったら人気者になれるかな。」\n「まずは自分を磨くところからだね。」' },
+            '6so': { name: '六索', text: '「毎日コツコツ頑張ってます。」\n「誰も気づいてくれないけど。」' },
+            '7so': { name: '七索', text: '「ラッキーセブン、再び。」\n「七萬とはライバル関係です。」' },
+            '8so': { name: '八索', text: '「竹みたいに、しなやかに生きたい。」\n「でもリーチには弱いです。」' },
+            '9so': { name: '九索', text: '「ここまで来たら、もうベテラン。」\n「でも新人の一索には負けたくない。」' },
+            
+            'ton': { name: '東', text: '「今日は僕が親だ！」\n「とりあえず、みんなお茶でも飲んで落ち着こう。」' },
+            'nan': { name: '南', text: '「南国っていいよね、暖かそうで。」\n「僕も一度くらいバカンスに行きたい。」' },
+            'sya': { name: '西', text: '「読み方はシャーです。」\n「初対面で正しく読んでもらえると、ちょっとうれしい。」' },
+            'pei': { name: '北', text: '「寒いって言わないで。」\n「名前だけで判断するの、よくないと思う。」' },
+            'haku': { name: '白', text: '「何も書いてないけど、ちゃんと存在してます。」\n「無地にも個性ってあるんだよ。」' },
+            'hatu': { name: '發', text: '「財運なら任せてください。」\n「給料日前の人、ぜひ僕を集めてください。」' },
+            'tyun': { name: '中', text: '「僕が来たら、ちょっと期待していいよ。」\n「ただし、三枚そろうかどうかは別の話。」' }
+        };
+        
+        return descriptions[tile] || { name: '不明', text: '' };
+    }
+    
     // コレクションを読み込む
     loadCollection() {
         const saved = localStorage.getItem('mahjongCollection');
@@ -1789,6 +1834,13 @@ class FallingGame {
             if (this.collection.includes(tile)) {
                 // 獲得済み
                 tileDiv.innerHTML = `<img src="${folder}/${tile}.png" alt="${tile}">`;
+                // クリックイベントを追加
+                tileDiv.style.cursor = 'pointer';
+                tileDiv.addEventListener('click', () => this.showTileDetail(tile, folder));
+                tileDiv.addEventListener('touchend', (e) => {
+                    e.preventDefault();
+                    this.showTileDetail(tile, folder);
+                });
             } else {
                 // 未獲得（？で表示）
                 tileDiv.innerHTML = '<div class="tile-unknown">？</div>';
@@ -1796,6 +1848,75 @@ class FallingGame {
             }
             
             container.appendChild(tileDiv);
+        });
+    }
+    
+    // 麻雀牌詳細を表示
+    showTileDetail(tile, folder) {
+        const description = this.getTileDescription(tile);
+        
+        const overlay = document.createElement('div');
+        overlay.style.cssText = `
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 99999;
+        `;
+        
+        const popup = document.createElement('div');
+        popup.style.cssText = `
+            background: rgba(0, 0, 0, 0.95);
+            border: 2px solid #00ffff;
+            border-radius: 12px;
+            padding: 30px;
+            max-width: 500px;
+            width: 90%;
+            box-shadow: 0 0 30px rgba(0, 255, 255, 0.5);
+        `;
+        
+        popup.innerHTML = `
+            <div style="display: flex; gap: 20px; align-items: flex-start;">
+                <div style="flex-shrink: 0;">
+                    <img src="${folder}/${tile}.png" style="width: 100px; height: 133px; border: 2px solid #00ffff; border-radius: 4px;">
+                </div>
+                <div style="flex: 1; color: #ffffff;">
+                    <h3 style="color: #00ffff; font-size: 24px; margin-bottom: 15px; text-shadow: 0 0 10px #00ffff;">${description.name}</h3>
+                    <p style="font-size: 16px; line-height: 1.8; white-space: pre-line;">${description.text}</p>
+                </div>
+            </div>
+            <button id="close-tile-detail-btn" style="
+                width: 100%;
+                padding: 15px;
+                font-size: 18px;
+                font-weight: 700;
+                background: #00ffff;
+                color: #000;
+                border: none;
+                border-radius: 8px;
+                cursor: pointer;
+                margin-top: 20px;
+                transition: all 0.3s;
+            ">閉じる</button>
+        `;
+        
+        overlay.appendChild(popup);
+        document.body.appendChild(overlay);
+        
+        // オーバーレイをクリックしても閉じる
+        overlay.addEventListener('click', (e) => {
+            if (e.target === overlay) {
+                document.body.removeChild(overlay);
+            }
+        });
+        
+        document.getElementById('close-tile-detail-btn').addEventListener('click', () => {
+            document.body.removeChild(overlay);
         });
     }
 }
