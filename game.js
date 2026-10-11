@@ -24,6 +24,8 @@ class FallingGame {
         // 麻雀牌コレクション
         this.collection = this.loadCollection();
         this.lastRewardMonth = localStorage.getItem('lastRewardMonth') || '';
+        this.dailyPlayCount = this.loadDailyPlayCount(); // v2.0.0: 1日のプレイ回数
+        this.lastPlayDate = localStorage.getItem('lastPlayDate') || ''; // v2.0.0: 最後にプレイした日付
         
         // 🔧 DEBUG: テスト用に各種類5個ずつ追加（後で削除）
         this.addDebugTiles();
@@ -1065,6 +1067,125 @@ class FallingGame {
                 this.requestAppReview();
             }, 2000); // ゲームオーバー表示の後に表示
         }
+        
+        // v2.0.0: 1日10プレイ報酬のチェック
+        this.checkDailyPlayReward();
+    }
+    
+    // v2.0.0: 1日のプレイ回数を読み込む
+    loadDailyPlayCount() {
+        const today = this.getTodayDateFull();
+        const lastDate = localStorage.getItem('lastPlayDate') || '';
+        
+        // 日付が変わっていたらリセット
+        if (lastDate !== today) {
+            localStorage.setItem('lastPlayDate', today);
+            localStorage.setItem('dailyPlayCount', '0');
+            return 0;
+        }
+        
+        const saved = localStorage.getItem('dailyPlayCount');
+        return saved ? parseInt(saved) : 0;
+    }
+    
+    // v2.0.0: 1日のプレイ回数を保存
+    saveDailyPlayCount() {
+        localStorage.setItem('dailyPlayCount', this.dailyPlayCount.toString());
+        localStorage.setItem('lastPlayDate', this.getTodayDateFull());
+    }
+    
+    // v2.0.0: 1日10プレイ報酬をチェック
+    checkDailyPlayReward() {
+        // プレイ回数をインクリメント
+        this.dailyPlayCount++;
+        this.saveDailyPlayCount();
+        
+        // 10回目のプレイ時
+        if (this.dailyPlayCount === 10) {
+            // 未獲得の麻雀牌をランダムに1個獲得
+            const newTiles = this.getRandomUnownedTiles(1);
+            
+            if (newTiles.length > 0) {
+                this.addTilesToCollection(newTiles);
+                
+                // 獲得ポップアップを表示（少し遅らせる）
+                setTimeout(() => {
+                    this.showDailyRewardPopup(newTiles);
+                }, 3500); // ゲームオーバー表示の後
+            } else {
+                // 全種コンプリート済みの場合
+                setTimeout(() => {
+                    this.showToast('本日の10プレイ達成！（全種コンプリート済み）', 'info');
+                }, 3500);
+            }
+        }
+    }
+    
+    // v2.0.0: 1日10プレイ報酬ポップアップを表示
+    showDailyRewardPopup(tiles) {
+        const overlay = document.createElement('div');
+        overlay.style.cssText = `
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 99999;
+        `;
+        
+        const popup = document.createElement('div');
+        popup.style.cssText = `
+            background: rgba(0, 0, 0, 0.95);
+            border: 2px solid #00ffff;
+            border-radius: 12px;
+            padding: 30px;
+            text-align: center;
+            max-width: 400px;
+            box-shadow: 0 0 30px rgba(0, 255, 255, 0.5);
+        `;
+        
+        // 獲得した牌の画像HTML
+        let tilesHTML = tiles.map(tile => {
+            const folder = this.getTileFolder(tile);
+            return `<img src="${folder}/${tile}.png" style="width: 60px; height: 80px; margin: 5px; border: 2px solid #00ffff; border-radius: 4px;">`;
+        }).join('');
+        
+        // 全種コンプリートチェック
+        const allTiles = this.getAllTiles();
+        const totalTiles = allTiles.manzu.length + allTiles.pinzu.length + allTiles.sozu.length + allTiles.zihai.length;
+        const isComplete = this.collection.length === totalTiles;
+        
+        popup.innerHTML = `
+            <h2 style="color: #00ffff; font-size: 24px; margin-bottom: 20px; text-shadow: 0 0 10px #00ffff;">本日10プレイ達成！</h2>
+            <p style="color: #ffffff; font-size: 18px; margin-bottom: 20px;">以下の麻雀牌を手に入れました！</p>
+            <div style="display: flex; flex-wrap: wrap; justify-content: center; margin-bottom: 20px;">
+                ${tilesHTML}
+            </div>
+            ${isComplete ? '<p style="color: #ffd700; font-size: 20px; font-weight: 700; margin-bottom: 20px;">全種コンプリートおめでとう！</p>' : ''}
+            <button id="close-daily-reward-btn" style="
+                width: 100%;
+                padding: 15px;
+                font-size: 18px;
+                font-weight: 700;
+                background: #00ffff;
+                color: #000;
+                border: none;
+                border-radius: 8px;
+                cursor: pointer;
+                transition: all 0.3s;
+            ">OK</button>
+        `;
+        
+        overlay.appendChild(popup);
+        document.body.appendChild(overlay);
+        
+        document.getElementById('close-daily-reward-btn').addEventListener('click', () => {
+            document.body.removeChild(overlay);
+        });
     }
     
     // v2.0.0: アプリレビュー依頼
