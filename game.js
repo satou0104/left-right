@@ -299,7 +299,7 @@ class FallingGame {
                 cursor: pointer;
                 margin-bottom: 10px;
                 transition: all 0.3s;
-            ">広告を見る（クレジット10回復）</button>
+            ">広告を見る（クレジット6回復）</button>
             <button id="cancel-ad-btn" style="
                 width: 100%;
                 padding: 15px;
