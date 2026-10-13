@@ -1252,11 +1252,7 @@ class FallingGame {
         `;
         
         popup.innerHTML = `
-            <h2 style="color: #00ffff; font-size: 24px; margin-bottom: 20px; text-shadow: 0 0 10px #00ffff;">アプリを楽しんでいただけていますか?</h2>
-            <p style="color: #ffffff; font-size: 16px; margin-bottom: 25px; line-height: 1.6;">
-                よろしければApp Storeでレビューをお願いします！<br>
-                あなたの評価がアプリの改善に役立ちます。
-            </p>
+            <h2 style="color: #00ffff; font-size: 24px; margin-bottom: 20px; text-shadow: 0 0 10px #00ffff;">App Storeで<br>レビューをお願いします。</h2>
             <button id="review-yes-btn" style="
                 width: 100%;
                 padding: 15px;
