@@ -185,6 +185,17 @@ class FallingGame {
         return localStorage.getItem('rankingName') || 'aaa';
     }
     
+    // デバイスIDを取得（初回起動時に生成）
+    getDeviceId() {
+        let deviceId = localStorage.getItem('deviceId');
+        if (!deviceId) {
+            // ランダムな8桁の英数字ID生成
+            deviceId = Math.random().toString(36).substring(2, 10);
+            localStorage.setItem('deviceId', deviceId);
+        }
+        return deviceId;
+    }
+    
     // クレジットを読み込む
     loadCredits() {
         // 最後にクレジットを保存した日付を取得
@@ -1464,11 +1475,13 @@ class FallingGame {
         try {
             const mode = this.isSuperHardMode ? 'superhard' : (this.isHardMode ? 'hard' : 'normal');
             const today = this.getTodayDate();
+            const deviceId = this.getDeviceId(); // デバイスIDを取得
             const dbRef = window.firebaseRef(window.firebaseDB, `rankings/${mode}/${today}`);
             const newScoreRef = window.firebasePush(dbRef);
             
             await window.firebaseSet(newScoreRef, {
                 nickname: nickname,
+                deviceId: deviceId, // デバイスIDを保存
                 score: score,
                 timestamp: Date.now(),
                 date: today
@@ -1601,6 +1614,11 @@ class FallingGame {
     async checkMonthlyReward() {
         const currentMonth = this.getTodayDate(); // YYYY-MM形式
         
+        // 2026年11月より前は報酬なし（11月運用開始）
+        if (currentMonth < '2026-11') {
+            return;
+        }
+        
         // 既に今月の報酬を受け取っている場合はスキップ
         if (this.lastRewardMonth === currentMonth) {
             return;
@@ -1636,9 +1654,10 @@ class FallingGame {
             // スコアで降順ソート
             rankings.sort((a, b) => b.score - a.score);
             
-            // 自分のニックネームと照合
+            // 自分のニックネームとデバイスIDで照合
             const myNickname = this.getRankingName();
-            const myRank = rankings.findIndex(r => r.nickname === myNickname);
+            const myDeviceId = this.getDeviceId();
+            const myRank = rankings.findIndex(r => r.nickname === myNickname && r.deviceId === myDeviceId);
             
             if (myRank === -1) {
                 return; // ランキングに参加していない
