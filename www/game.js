@@ -40,6 +40,11 @@ class FallingGame {
     
     // 🔧 DEBUG: テスト用の麻雀牌追加関数（後で削除）
     addDebugTiles() {
+        // 既にデバッグ済みフラグがあれば追加しない
+        if (localStorage.getItem('debugTilesAdded') === 'true') {
+            return;
+        }
+        
         const testTiles = [
             // 萬子から5個
             '1man', '2man', '3man', '4man', '5man',
@@ -51,8 +56,12 @@ class FallingGame {
             'ton', 'nan', 'sya', 'pei', 'haku'
         ];
         
-        this.collection = testTiles;
+        // 既存のコレクションに追加（重複は自動的に除外される）
+        this.collection = [...new Set([...this.collection, ...testTiles])];
         this.saveCollection();
+        
+        // フラグを立てる（次回以降は追加しない）
+        localStorage.setItem('debugTilesAdded', 'true');
     }
     
     // スーパーハードのアンロック状態をチェック
@@ -1061,8 +1070,8 @@ class FallingGame {
         // レビュー依頼済みフラグを確認
         const hasRequestedReview = localStorage.getItem('hasRequestedReview') === 'true';
         
-        // 5回目のプレイかつ未依頼の場合、レビューを依頼
-        if (playCount === 5 && !hasRequestedReview) {
+        // 15回目のプレイかつ未依頼の場合、レビューを依頼
+        if (playCount === 15 && !hasRequestedReview) {
             setTimeout(() => {
                 this.requestAppReview();
             }, 2000); // ゲームオーバー表示の後に表示
