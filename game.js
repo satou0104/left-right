@@ -27,41 +27,12 @@ class FallingGame {
         this.dailyPlayCount = this.loadDailyPlayCount(); // v2.0.0: 1日のプレイ回数
         this.lastPlayDate = localStorage.getItem('lastPlayDate') || ''; // v2.0.0: 最後にプレイした日付
         
-        // 🔧 DEBUG: テスト用に各種類5個ずつ追加（後で削除）
-        this.addDebugTiles();
-        
         this.init();
         this.initScreenNavigation();
         this.checkSuperHardUnlock();
         this.initRankingName(); // ランキング名の初期化
         this.updateCreditDisplay(); // クレジット表示を更新
         this.checkMonthlyReward(); // 月次報酬チェック
-    }
-    
-    // 🔧 DEBUG: テスト用の麻雀牌追加関数（後で削除）
-    addDebugTiles() {
-        // 既にデバッグ済みフラグがあれば追加しない
-        if (localStorage.getItem('debugTilesAdded') === 'true') {
-            return;
-        }
-        
-        const testTiles = [
-            // 萬子から5個
-            '1man', '2man', '3man', '4man', '5man',
-            // 筒子から5個
-            '1pin', '2pin', '3pin', '4pin', '5pin',
-            // 索子から5個
-            '1so', '2so', '3so', '4so', '5so',
-            // 字牌から5個
-            'ton', 'nan', 'sya', 'pei', 'haku'
-        ];
-        
-        // 既存のコレクションに追加（重複は自動的に除外される）
-        this.collection = [...new Set([...this.collection, ...testTiles])];
-        this.saveCollection();
-        
-        // フラグを立てる（次回以降は追加しない）
-        localStorage.setItem('debugTilesAdded', 'true');
     }
     
     // スーパーハードのアンロック状態をチェック
@@ -1317,12 +1288,6 @@ class FallingGame {
             document.body.removeChild(overlay);
             // 後でを選んだ場合は、次回また依頼できるようにフラグは立てない
         });
-    }
-    
-    // 🔧 DEBUG: 1位報酬ポップアップのテスト関数（後で削除）
-    testFirstPlaceReward() {
-        const testTiles = this.getRandomUnownedTiles(5);
-        this.showTileRewardPopup(testTiles, 1);
     }
     
     saveHighScore(score) {
