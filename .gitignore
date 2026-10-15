@@ -19,6 +19,24 @@ npm-debug.log*
 *.tmp
 *.temp
 
+# Node
+node_modules/
+
+# Capacitor
+.capacitor/
+
+# iOS
+ios/App/Pods/
+ios/App/App.xcworkspace/xcuserdata/
+ios/App/build/
+*.ipa
+*.dSYM.zip
+*.dSYM
+
+# Xcode
+xcuserdata/
+DerivedData/
+
 # 証明書と秘密鍵（絶対にコミットしない）
 *.key
 *.p12
@@ -26,6 +44,9 @@ npm-debug.log*
 *.certSigningRequest
 *.cer
 *.mobileprovision
+
+# Kiro IDE
+.kiro/
 
 # 開発ドキュメント（内部用）
 ios-app-development.md

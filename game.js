@@ -1182,25 +1182,14 @@ class FallingGame {
     // v2.0.0: アプリレビュー依頼
     async requestAppReview() {
         try {
-            // Capacitorプラグインが利用可能かチェック
-            if (typeof window.Capacitor !== 'undefined' && window.Capacitor.Plugins) {
-                const { App } = window.Capacitor.Plugins;
-                
-                // iOS/Androidでネイティブレビューを試みる
-                if (App && App.requestReview) {
-                    // Capacitor 6.0以降のネイティブレビュー機能
-                    await App.requestReview();
-                    localStorage.setItem('hasRequestedReview', 'true');
-                    // レビュー表示時に広告回数をリセット
-                    this.restoreCredits();
-                    return;
-                } else if (window.Capacitor.Plugins.RateApp) {
-                    // 代替: capacitor-rate-appプラグインを使用
-                    await window.Capacitor.Plugins.RateApp.requestReview();
-                    localStorage.setItem('hasRequestedReview', 'true');
-                    this.restoreCredits();
-                    return;
-                }
+            // @capacitor-community/in-app-review プラグインを使用
+            if (typeof window.Capacitor !== 'undefined' && window.Capacitor.Plugins && window.Capacitor.Plugins.InAppReview) {
+                const { InAppReview } = window.Capacitor.Plugins;
+                await InAppReview.requestReview();
+                localStorage.setItem('hasRequestedReview', 'true');
+                // レビュー表示時に広告回数をリセット
+                this.restoreCredits();
+                return;
             }
             
             // プラグインが利用できない場合はカスタムダイアログを表示
